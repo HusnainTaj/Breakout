@@ -128,10 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="mygraphics.h" />
+    <ClInclude Include="youregraphics.h" />
     <ClInclude Include="yourgraphics.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="afaq heart.cpp" />
     <ClCompile Include="afaq.cpp" />
+    <ClCompile Include="image.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

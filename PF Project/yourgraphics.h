@@ -122,8 +122,16 @@ void delay(int ms)
 	Sleep(ms);
 }
 
+
+#define KEY_UP    -119
+#define KEY_DOWN    -115
+#define KEY_LEFT  -100
+#define KEY_RIGHT  -97
+#define WINDOW_FOCUS_CHANGED  -8
+
 char getKey()
 {
+	
 	HANDLE consoleHandle = GetStdHandle(STD_INPUT_HANDLE);
 	DWORD size = 1;
 	INPUT_RECORD input[1];
@@ -131,11 +139,40 @@ char getKey()
 	char key = '\0';
 
 	if (PeekConsoleInput(consoleHandle,input,size,&events)){
-		if (input[0].EventType == KEY_EVENT){
-			key = input[0].Event.KeyEvent.uChar.AsciiChar;
+
+		/*if (input[0].EventType == 4) DebugBreak();
+		std::cout << "key: " << input[0].EventType;*/
+		//std::cout << "key: " << input[0].Event.MouseEvent.dwMousePosition.X;
+		if (input[0].EventType == WINDOW_BUFFER_SIZE_EVENT)
+		{
+			/*gotoxy(0, 1);
+			std::cout << "mouse ";*/
+			Beep(500, 500);
+
+		}
+		if (input[0].EventType == FOCUS_EVENT)
+		{
 			FlushConsoleInputBuffer(consoleHandle);
+			return WINDOW_FOCUS_CHANGED;
+			/*gotoxy(0, 2);
+			std::cout << "focus ";*/
+
+		}
+		if (input[0].EventType == KEY_EVENT)
+		{
+			if (input[0].Event.KeyEvent.wVirtualKeyCode == 38) key = KEY_UP;
+			else if (input[0].Event.KeyEvent.wVirtualKeyCode == 39) key = KEY_RIGHT;
+			else if (input[0].Event.KeyEvent.wVirtualKeyCode == 37) key = KEY_LEFT;
+			else if (input[0].Event.KeyEvent.wVirtualKeyCode == 40) key = KEY_DOWN;
+			else key = input[0].Event.KeyEvent.uChar.AsciiChar;
+
+			FlushConsoleInputBuffer(consoleHandle);
+
+
 			return key;
 		}
+
+		FlushConsoleInputBuffer(consoleHandle);
 	}
 
 	return key; // returns NULL if no input event recorded
@@ -146,6 +183,7 @@ void getWindowDimensions(int& width, int& height)
 	HWND consoleHandle = GetConsoleWindow();
 	RECT rc;
 	GetClientRect(consoleHandle, &rc);
+	//GetWindowRect(consoleHandle, &rc);
 	width = rc.right;
 	height = rc.bottom;
 }
@@ -161,6 +199,10 @@ void getConsoleWindowDimensions(int& width, int& height)
 
 	width = csbi.srWindow.Right;
 	height = csbi.srWindow.Bottom;
+
+	int w = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	int h = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
 }
 
 void gotoxy(int x, int y)

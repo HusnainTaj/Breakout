@@ -21,12 +21,21 @@
     <ClInclude Include="yourgraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="youregraphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="afaq.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="afaq heart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
