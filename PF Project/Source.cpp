@@ -8,6 +8,8 @@
 //#include "yourgraphics.h"
 #include <vector>
 #include "youregraphics.h"
+#include "resource.h"
+
 using namespace std;
 
 float dpiRatio = 1;
@@ -277,12 +279,9 @@ void LoadHighScores()
 
 #pragma region Colission Detection
 
-// TODO: fix
 int LastTimeBrickBroke = 0;
 void HandleBrickCollission(Ball& ball)
 {
-	bool brokeOnce = false;
-
 	// detecting collision for the next ball position
 	int nextBallX = ball.x + ball.force_x;
 	int nextBallY = ball.y + ball.force_y;
@@ -290,12 +289,12 @@ void HandleBrickCollission(Ball& ball)
 	int minDistanceX = ball.width / 2 + bricks[0][0].width / 2;
 	int minDistanceY = ball.height / 2 + bricks[0][0].height / 2;
 
+	int minProjectileDistanceX = projectile.radius + bricks[0][0].width / 2;
+
 	for (int r = 0; r < BricksRowCount; r++)
 	{
 		for (int c = 0; c < BricksColCount; c++)
 		{
-			if (brokeOnce) return;
-
 			// dont even check for collision if bricks health is zero
 			if (bricks[r][c].health == 0) continue;
 
@@ -322,61 +321,13 @@ void HandleBrickCollission(Ball& ball)
 				collisioned = true;
 			}
 
-
-			// TODO: delete
-			//if (
-			//	nextBallY < brick.y + brick.height && ball.height + nextBallY > brick.y &&
-			//	nextBallX < brick.x + brick.width && nextBallX > brick.x
-			//	)
-			//{
-
-			//	if ((nextBallY >= brick.y + brick.height) ||
-			//		(nextBallY + ball.height <= brick.y))
-			//		ball.force_y *= -1;
-			//	else
-			//		ball.force_x *= -1;
-
-
-			//	////PlaySound(TEXT("D:/hit.wav"), NULL, SND_FILENAME | SND_ASYNC);
-
-			//	//// Distance Between Centers of Ball and Brick
-			//	//int centerDistanceX = (nextBallX + ball.width / 2) - (brick.x + brick.width / 2);
-			//	//int centerDistanceY = (nextBallY + ball.height / 2) - (brick.y + brick.height / 2);
-
-			//	//// Minimum Distance Between Ball and Brick before they collide
-			//	//int minDistanceX = ball.width / 2 + brick.width / 2;
-			//	//int minDistanceY = ball.height / 2 + brick.height / 2;
-
-			//	//// Calculate the depth of collision for both the X and Y axis
-			//	//int depthX = centerDistanceX > 0 ? minDistanceX - centerDistanceX : -minDistanceX - centerDistanceX;
-			//	//int depthY = centerDistanceY > 0 ? minDistanceY - centerDistanceY : -minDistanceY - centerDistanceY;
-
-			//	//if (depthX != 0 && depthY != 0)
-			//	//{
-			//	//	if (abs(depthX) < abs(depthY))
-			//	//		ball.force_x *= -1;
-			//	//	else
-			//	//		ball.force_y *= -1;
-			//	//}
-			//	//else
-			//	//{
-			//	//	gotoxy(0, 0);
-			//	//	cout << "bruuuuuuuuuuuuuuuuuuuuuuuuuuuuh";
-			//	//}
-
-			//	if (ball.fireball)
-			//		brick.health = 0;
-			//	else
-			//		brick.health--;
-
-			//	collisioned = true;
-			//}
-
+			float projectileDistanceX = abs((brick.x + brick.width / 2) - (projectile.x + projectile.radius));
 
 			// Collisoin for Projectile
 			if (
 				projectile.active &&
-				projectile.x + projectile.radius > brick.x && projectile.x + projectile.radius < brick.x + brick.width &&
+				projectileDistanceX <= minProjectileDistanceX &&
+				//projectile.x + projectile.diameter > brick.x && projectile.x + projectile.radius < brick.x + brick.width &&
 				projectile.y < brick.y + brick.height
 				//&& projectile.y + projectile.radius > brick.y
 				)
@@ -425,20 +376,22 @@ void HandleBrickCollission(Ball& ball)
 					{
 						powerUp.color = COLORS.Purple;
 						powerUp.x = brick.x + brick.width / 2;
+
 						// dropping from last bricks height to avoid reprinting bricks
 						powerUp.y = bricks[BricksRowCount - 1][BricksColCount - 1].y + bricks[BricksRowCount - 1][BricksColCount - 1].height;
-						if (onChance(5)) // TODO: update testing
-						{
+						
+						int randomChance = rand() % 100;
+						
+						if (randomChance < 5) // 5
 							powerUp.type = PowerUpTypes.projectile;
-						}
-						else if (onChance(5))
+						else if (randomChance >= 5 && randomChance < 10) // 5
 						{
 							powerUp.type = PowerUpTypes.life;
 							powerUp.color = COLORS.Red;
 						}
-						else if (onChance(15))
+						else if(randomChance >= 10 && randomChance < 25) // 15
 							powerUp.type = PowerUpTypes.fireball;
-						else if (onChance(80))
+						else if (randomChance >= 25 && randomChance < 100) // 75
 							powerUp.type = onChance(50) ? PowerUpTypes.elongate : PowerUpTypes.shorten;
 
 						powerUp.dropping = true;
@@ -447,9 +400,11 @@ void HandleBrickCollission(Ball& ball)
 
 				// Stop the game if all bricks are broken
 				if (GameManager.BricksLeft <= 0) GameManager.Over = true;
-
-				brokeOnce = true;
 			}
+
+
+			if (collisioned && !projectile.active)
+				return;
 		}
 	}
 }
@@ -460,7 +415,7 @@ bool HandlePaddleCollission(Ball& ball)
 	int nextBallx = ball.x + ball.force_x;
 	int nextBallY = ball.y + ball.force_y;
 
-	// TODO: check for center
+	// TODO: unpleg
 	if (
 		nextBallx < player.x + player.width && nextBallx + ball.width > player.x &&
 		nextBallY < player.y + player.height && ball.height + nextBallY > player.y
@@ -488,27 +443,6 @@ bool HandlePaddleCollission(Ball& ball)
 
 			ball.force_x = BALL_FORCE * cos((ratio * (180 - 30) + 15) * 3.14 / 180);
 			ball.force_y = -BALL_FORCE * sin((ratio * (180 - 30) + 15) * 3.14 / 180);
-
-
-			// TODO: for testing, remove
-			//if (abs(depthX) < abs(depthY))
-			//{
-			//	//ball.force_x *= -1;
-
-			//	int ballCenter = ball.x + ball.width / 2;
-
-			//	if (ballCenter < player.x + player.width / 3)
-			//		ball.force_x = -10;
-			//	else if (ballCenter > player.x + player.width / 3 && ballCenter < player.x + player.width * 2/3)
-			//		ball.force_x = 0;
-			//	else if (ballCenter > player.x + player.width * 2 / 3)
-			//		ball.force_x = 10;
-			//	else ball.force_x *= -1;
-			//		
-			//}
-			//else
-			//	ball.force_y *= -1;
-
 		}
 
 		return true;
@@ -599,11 +533,9 @@ void Clear(Color bg = COLORS.Back)
 
 void DrawPlayer(bool redraw = false)
 {
-	// TODO: Optimization
-	// dont draw again if the player is not moving
-	//if (player.force_x == 0) return;
-
 	if (redraw) drawRectangle(0, player.y, gameWidth, player.y + player.height, COLORS.Back);
+
+	if (!redraw && player.force_x == 0) return;
 
 	// Removing old paddle
 	if (player.x + player.width > gameWidth)
@@ -1320,6 +1252,7 @@ void UpdateFontSizePx(int fHeight)
 
 int main()
 {
+	PlaySound(MAKEINTRESOURCE(IDR_WAVE1), NULL, SND_RESOURCE | SND_ASYNC | SND_LOOP);
 
 	//TODO: remove all paths to D and E
 	//PlaySound(TEXT("D:/bgsoundc.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
@@ -1514,13 +1447,11 @@ int main()
 #pragma endregion
 
 
-	// TODO: test and udpate
 	system("color 07");
 	Clear();
 	UpdateFontSizePx(TopRowHeight - 2);
 	drawRectangle(0, 0, gameWidth, gameHeight, COLORS.Back);
 	drawRectangle(0, 0, gameWidth, TopRowHeight, COLORS.Front);
-	delay(100);
 
 	if (currentMenuItem == 0)
 	{
@@ -1608,7 +1539,6 @@ int main()
 		else if (onKey('r', c))
 		{
 			GameManager.paused = false;
-
 
 			gotoxy(consoleCols / 2 - strlen("SAVE   PAUSE ") / 2, 0);
 			cout << "\033[7mS\033[27mAVE   \033[7mP\033[27mAUSE \033[27m";
