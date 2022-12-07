@@ -65,7 +65,7 @@ struct Player
 
 	int force_x = 0;
 
-	int lives = 3; 
+	int lives = 3;
 
 } player;
 
@@ -137,6 +137,8 @@ struct
 	bool Over = false;
 	bool paused = false;
 
+	bool focusOut = false;
+
 	bool showStats = false;
 	int BricksLeft = BricksColCount * BricksRowCount;
 
@@ -161,7 +163,7 @@ void Clear(Color);
 void UpdateFontSize(int);
 void DrawLives();
 void DrawPlayer(bool);
-
+void PrintCenter(int row, string start, string str, string end);
 #pragma endregion
 
 #pragma region Library Extensions
@@ -279,62 +281,39 @@ void LoadHighScores()
 int LastTimeBrickBroke = 0;
 void HandleBrickCollission(Ball& ball)
 {
+	bool brokeOnce = false;
+
 	// detecting collision for the next ball position
-	int nextBallx = ball.x + ball.force_x;
+	int nextBallX = ball.x + ball.force_x;
 	int nextBallY = ball.y + ball.force_y;
+
+	int minDistanceX = ball.width / 2 + bricks[0][0].width / 2;
+	int minDistanceY = ball.height / 2 + bricks[0][0].height / 2;
 
 	for (int r = 0; r < BricksRowCount; r++)
 	{
 		for (int c = 0; c < BricksColCount; c++)
 		{
+			if (brokeOnce) return;
+
+			// dont even check for collision if bricks health is zero
+			if (bricks[r][c].health == 0) continue;
+
 			bool collisioned = false;
 			Brick& brick = bricks[r][c];
 
-			// dont even check for collision if bricks health is zero
-			if (brick.health == 0) continue;
+			float distanceX = abs((brick.x + brick.width / 2) - (nextBallX + ball.width / 2));
+			float distanceY = abs((brick.y + brick.height / 2) - (nextBallY + ball.height / 2));
 
-			if (
-				nextBallY < brick.y + brick.height && ball.height + nextBallY > brick.y &&
-				nextBallx < brick.x + brick.width && nextBallx + ball.width > brick.x
-				)
+			if (distanceX <= minDistanceX && distanceY <= minDistanceY) 
 			{
-				PlaySound(TEXT("D:/hit.wav"), NULL, SND_FILENAME | SND_ASYNC);
-
-				/*if (abs(ball.x - brick.x) > abs(ball.y - brick.y))
-					ball.force_x *= -1;
-				else
-					ball.force_y *= -1;*/
-
-				// Calculate the distance between centers
-				int centerDistanceX = (nextBallx + ball.width / 2) - (brick.x + brick.width / 2);
-				int centerDistanceY = (nextBallY + ball.height / 2) - (brick.y + brick.height / 2);
-
-				// Calculate the minimum distance to separate along X and Y
-				int minXDist = ball.width / 2 + brick.width / 2;
-				int minYDist = ball.height / 2 + brick.height / 2;
-
-				// Calculate the depth of collision for both the X and Y axis
-				int depthX = centerDistanceX > 0 ? minXDist - centerDistanceX : -minXDist - centerDistanceX;
-				int depthY = centerDistanceY > 0 ? minYDist - centerDistanceY : -minYDist - centerDistanceY;
-
-				if (depthX != 0 && depthY != 0)
+				if (nextBallY + ball.height / 2 > brick.y + brick.height ||
+					nextBallY + ball.height / 2 < brick.y)
 				{
-					if (abs(depthX) < abs(depthY))
-						ball.force_x *= -1;
-					else
-						ball.force_y *= -1;
+					ball.force_y *= -1;
 				}
-				else
-				{
-					/*gotoxy(10, 10);
-					cout << "bruuuuuh";
-					ball.force_x *= -1;
-					ball.force_y *= -1;*/
-				}
-
-
-
-
+				else ball.force_x *= -1;
+				
 				if (ball.fireball)
 					brick.health = 0;
 				else
@@ -342,12 +321,64 @@ void HandleBrickCollission(Ball& ball)
 
 				collisioned = true;
 			}
-		
-	
+
+
+			// TODO: delete
+			//if (
+			//	nextBallY < brick.y + brick.height && ball.height + nextBallY > brick.y &&
+			//	nextBallX < brick.x + brick.width && nextBallX > brick.x
+			//	)
+			//{
+
+			//	if ((nextBallY >= brick.y + brick.height) ||
+			//		(nextBallY + ball.height <= brick.y))
+			//		ball.force_y *= -1;
+			//	else
+			//		ball.force_x *= -1;
+
+
+			//	////PlaySound(TEXT("D:/hit.wav"), NULL, SND_FILENAME | SND_ASYNC);
+
+			//	//// Distance Between Centers of Ball and Brick
+			//	//int centerDistanceX = (nextBallX + ball.width / 2) - (brick.x + brick.width / 2);
+			//	//int centerDistanceY = (nextBallY + ball.height / 2) - (brick.y + brick.height / 2);
+
+			//	//// Minimum Distance Between Ball and Brick before they collide
+			//	//int minDistanceX = ball.width / 2 + brick.width / 2;
+			//	//int minDistanceY = ball.height / 2 + brick.height / 2;
+
+			//	//// Calculate the depth of collision for both the X and Y axis
+			//	//int depthX = centerDistanceX > 0 ? minDistanceX - centerDistanceX : -minDistanceX - centerDistanceX;
+			//	//int depthY = centerDistanceY > 0 ? minDistanceY - centerDistanceY : -minDistanceY - centerDistanceY;
+
+			//	//if (depthX != 0 && depthY != 0)
+			//	//{
+			//	//	if (abs(depthX) < abs(depthY))
+			//	//		ball.force_x *= -1;
+			//	//	else
+			//	//		ball.force_y *= -1;
+			//	//}
+			//	//else
+			//	//{
+			//	//	gotoxy(0, 0);
+			//	//	cout << "bruuuuuuuuuuuuuuuuuuuuuuuuuuuuh";
+			//	//}
+
+			//	if (ball.fireball)
+			//		brick.health = 0;
+			//	else
+			//		brick.health--;
+
+			//	collisioned = true;
+			//}
+
+
 			// Collisoin for Projectile
-			if (projectile.active &&
-				projectile.x + projectile.radius > brick.x && projectile.x < brick.x + brick.width &&
-				projectile.y < brick.y + brick.height && projectile.y + projectile.radius > brick.y
+			if (
+				projectile.active &&
+				projectile.x + projectile.radius > brick.x && projectile.x + projectile.radius < brick.x + brick.width &&
+				projectile.y < brick.y + brick.height
+				//&& projectile.y + projectile.radius > brick.y
 				)
 			{
 				brick.health = 0;
@@ -357,26 +388,26 @@ void HandleBrickCollission(Ball& ball)
 			// only redraw if something collided
 			if (collisioned)
 			{
-				Color bColor = COLORS.Back;
+				Color brickColor = COLORS.Back;
 
 				switch (brick.health)
 				{
-				case 3: bColor = COLORS.Green; break;
-				case 2: bColor = COLORS.Blue; break;
-				case 1: bColor = COLORS.Red; break;
-				default: bColor = COLORS.Back; break;
+				case 3: brickColor = COLORS.Green; break;
+				case 2: brickColor = COLORS.Blue; break;
+				case 1: brickColor = COLORS.Red; break;
+				default: brickColor = COLORS.Back; break;
 				}
 
-				Color col = bColor;
+				Color darkerBrickColor = brickColor;
 
 				if (brick.health != 0)
 				{
-					col.R *= 1 / 1.35;
-					col.G *= 1 / 1.35;
-					col.B *= 1 / 1.35;
+					darkerBrickColor.R *= 1 / 1.35;
+					darkerBrickColor.G *= 1 / 1.35;
+					darkerBrickColor.B *= 1 / 1.35;
 				}
 
-				drawRectangle(brick.x, brick.y, brick.x + brick.width, brick.y + brick.height, col, bColor);
+				drawRectangle(brick.x, brick.y, brick.x + brick.width, brick.y + brick.height, darkerBrickColor, brickColor);
 
 				if (brick.health <= 0)
 				{
@@ -416,6 +447,8 @@ void HandleBrickCollission(Ball& ball)
 
 				// Stop the game if all bricks are broken
 				if (GameManager.BricksLeft <= 0) GameManager.Over = true;
+
+				brokeOnce = true;
 			}
 		}
 	}
@@ -510,7 +543,7 @@ bool HandlePaddleCollission(PowerUp& powerUp)
 	if (
 		powerUp.x < player.x + player.width && powerUp.x + powerUp.width > player.x &&
 		powerUp.y + powerUp.force_y < player.y + player.height && powerUp.height + powerUp.y + powerUp.force_y > player.y
-	)
+		)
 	{
 		if (powerUp.type == PowerUpTypes.shorten)
 		{
@@ -570,7 +603,7 @@ void DrawPlayer(bool redraw = false)
 	// dont draw again if the player is not moving
 	//if (player.force_x == 0) return;
 
-	if(redraw) drawRectangle(0, player.y, gameWidth, player.y + player.height, COLORS.Back);
+	if (redraw) drawRectangle(0, player.y, gameWidth, player.y + player.height, COLORS.Back);
 
 	// Removing old paddle
 	if (player.x + player.width > gameWidth)
@@ -583,11 +616,11 @@ void DrawPlayer(bool redraw = false)
 		int overflow_left = player.x * -1;
 		drawRectangle(gameWidth - overflow_left, player.y, gameWidth, player.y + player.height, COLORS.Back);
 	}
-	
+
 	// Calculating the differnece b/w the area of last and new paddle position and remove that
-	if(player.x + player.force_x > player.x)
+	if (player.x + player.force_x > player.x)
 		drawRectangle(player.x, player.y, player.x + player.force_x + player.width, player.y + player.height, COLORS.Back);
-	else 
+	else
 		drawRectangle(player.x + player.force_x, player.y, player.x + player.width, player.y + player.height, COLORS.Back);
 
 
@@ -634,12 +667,11 @@ void DrawPlayer(bool redraw = false)
 
 void DrawBall()
 {
+	drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
+
 	HandleBrickCollission(ball);
 
 	HandlePaddleCollission(ball);
-
-	drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
-
 
 	// Checking for Wall Collision
 	if (ball.x + ball.force_x + ball.width >= gameWidth)
@@ -678,7 +710,6 @@ void DrawPowerUp()
 				player.width = player.normalWidth;
 			else if (powerUp.type == PowerUpTypes.fireball)
 				setFireball(false);
-			
 
 			DrawPlayer(true);
 		}
@@ -689,7 +720,7 @@ void DrawPowerUp()
 		bool hit = HandlePaddleCollission(powerUp);
 
 		drawEllipse(powerUp.x, powerUp.y, powerUp.x + powerUp.width, powerUp.y + powerUp.height, COLORS.Back);
-		
+
 		// adding force
 		powerUp.y += powerUp.force_y;
 
@@ -730,8 +761,8 @@ void DrawProjectile()
 void DrawHeart(int x1, int y1, int scale, Color color) {
 	// x1 and y1 coordinate of leftmost corner and it takes scale 
 	// scale determines size of heart
-	if (scale % 2 != 0) 
-	{					
+	if (scale % 2 != 0)
+	{
 		scale = scale / 2 * 2;
 	}
 	drawLine(x1, y1, x1 + (scale / 2), y1 + (scale / 2), color.R, color.G, color.B);
@@ -775,9 +806,16 @@ void DrawScore()
 		string a = to_string(GameManager.score);
 		gotoxy(0, 0);
 
-		cout << "\033[27m " << a << "\033[27";
+		cout << "\033[27m " << a << "";
 
 		lastScore = GameManager.score;
+
+		//cout << "\033[35;47m";
+
+		gotoxy(consoleCols / 2 - strlen("SAVE   PAUSE") / 2, 0);
+		cout << "\033[7mS\033[27mAVE   \033[7mP\033[27mAUSE\033[27m";
+		
+		//delay(100);
 	}
 }
 
@@ -827,6 +865,8 @@ void RedrawGame()
 
 	DrawPlayer(true);
 
+	DrawBall();
+
 	lastScore = -1;
 	DrawScore();
 
@@ -839,7 +879,7 @@ void RedrawGame()
 bool DoesSaveFileExist()
 {
 	ifstream saveFile;
-	saveFile.open("E:/gamestate.txt");
+	saveFile.open("gamestate.txt");
 
 	return saveFile.is_open();
 }
@@ -847,7 +887,7 @@ bool DoesSaveFileExist()
 void SaveGameState()
 {
 	ofstream saveFile;
-	saveFile.open("E:/gamestate.txt");
+	saveFile.open("gamestate.txt");
 
 	saveFile << player.x << endl;
 	saveFile << player.y << endl;
@@ -904,7 +944,7 @@ void SaveGameState()
 void LoadGameState()
 {
 	ifstream saveFile;
-	saveFile.open("E:/gamestate.txt");
+	saveFile.open("gamestate.txt");
 
 	saveFile >> player.x;
 	saveFile >> player.y;
@@ -1011,7 +1051,7 @@ void setInitPos()
 	// Player Set up
 	player.x = gameWidth / 2 - player.width / 2;
 	player.y = gameHeight - player.height - 20;
-	
+
 	drawRectangle(0, player.y, gameWidth, player.y + player.height, COLORS.Back);
 
 	// Ball Set up
@@ -1051,7 +1091,7 @@ void printMenuItems()
 
 	for (int i = 0; i < menuItemsLength; i++)
 	{
-		gotoxy(a , startRow + i + 3);
+		gotoxy(a, startRow + i + 3);
 
 		if (currentMenuItem == i)
 		{
@@ -1065,7 +1105,7 @@ void printMenuItems()
 
 	}
 
-	gotoxy(a-2, startRow + 4 + 3);
+	gotoxy(a - 2, startRow + 4 + 3);
 	cout << " \033[7m TAJ && AFK ";
 	gotoxy(0, 0);
 }
@@ -1082,14 +1122,14 @@ string repeatStr(string s, int times)
 	return neww;
 }
 
-void PrintCenterHScores(int row, string start,  string str, string end, int division = 2)
+void PrintCenterHScores(int row, string start, string str, string end, int division = 2)
 {
 	gotoxy(consoleCols / 2, row);
 
 	int a = round((consoleCols / division - str.length() / 2));
 	int b = (consoleCols / 2) - a - str.length() + ((consoleCols % 2 == 0) ? 1 : 2);
 
-	cout << repeatStr(" ", a) << start << str << end << repeatStr(" ", b) ;
+	cout << repeatStr(" ", a) << start << str << end << repeatStr(" ", b);
 }
 
 void PrintCenter(int row, string start, string str, string end)
@@ -1098,7 +1138,7 @@ void PrintCenter(int row, string start, string str, string end)
 
 	gotoxy(a, row);
 
-	cout<< start << str << end;
+	cout << start << str << end;
 }
 
 void printHighScores()
@@ -1131,9 +1171,9 @@ void printHighScores()
 		{
 			string outputs = to_string(i + 1) + ". " + to_string(HighScores[i]);
 
-			if(HighScores[i] != 0)
+			if (HighScores[i] != 0)
 				PrintCenterHScores(startRow + i + 2, "", outputs, "", 4);
-			else 
+			else
 				PrintCenterHScores(startRow + i + 2, "", "", "");
 		}
 	}
@@ -1152,14 +1192,14 @@ const float TRANSITION_SPEED = 0.5;
 
 void TransitionCircleExpand(Color Back, Color Front)
 {
-	for (int i = 0; i < gameWidth / 1.5; i+=4)
+	for (int i = 0; i < gameWidth / 1.5; i += 4)
 	{
 		drawEllipse(gameWidth / 2 - i, gameHeight / 2 - i, gameWidth / 2 + i, gameHeight / 2 + i, Front);
 	}
 
 	delay(200);
 
-	for (int i = 0; i < gameWidth / 1.5; i+=4)
+	for (int i = 0; i < gameWidth / 1.5; i += 4)
 	{
 		drawEllipse(gameWidth / 2 - i, gameHeight / 2 - i, gameWidth / 2 + i, gameHeight / 2 + i, Back);
 
@@ -1178,7 +1218,7 @@ void TransitionRight(Color Back, Color Front)
 
 void TransitionRightR(Color Back, Color Front)
 {
-	for (float i = 0; i < gameWidth + gameWidth / 2; i+= TRANSITION_SPEED)
+	for (float i = 0; i < gameWidth + gameWidth / 2; i += TRANSITION_SPEED)
 	{
 		drawLine(0 + i, 0, 0 + i, gameHeight, Front.R, Front.G, Front.B);
 	}
@@ -1207,16 +1247,16 @@ void TransitionUp(Color Back, Color Front)
 	}
 }
 
-void TransitionDown( Color First, Color Second)
+void TransitionDown(Color First, Color Second)
 {
-	for (float i = 0; i < gameHeight + gameHeight / 2; i+= 0.5)
+	for (float i = 0; i < gameHeight + gameHeight / 2; i += 0.5)
 	{
 		drawLine(0, i, gameWidth, i, First.R, First.G, First.B);
 	}
 
 	delay(200);
 
-	for (float i = 0; i < gameHeight + gameHeight / 4; i+= 0.5)
+	for (float i = 0; i < gameHeight + gameHeight / 4; i += 0.5)
 	{
 		drawLine(0, i, gameWidth, i, Second.R, Second.G, Second.B);
 	}
@@ -1230,6 +1270,7 @@ void TransitionDown( Color First, Color Second)
 }
 #pragma endregion
 
+// Changes the font size of the console to get specified no of rows
 void UpdateFontSize(int rowsCount)
 {
 	rowsCount++;
@@ -1250,13 +1291,13 @@ void UpdateFontSize(int rowsCount)
 	GetCurrentConsoleFontEx(consoleHandle, FALSE, &cfi);
 	float b = cfi.dwFontSize.Y / (float)cfi.dwFontSize.X;
 
-	consoleCols = ((float)gameWidth / (float)cfi.dwFontSize.X ) / dpiRatio;
+	consoleCols = ((float)gameWidth / (float)cfi.dwFontSize.X) / dpiRatio;
 	consoleRows = ((float)gameHeight / cfi.dwFontSize.Y) / dpiRatio;
 
 	delay(500);
 }
 
-
+// Changes the font size of the console to a specific height
 void UpdateFontSizePx(int fHeight)
 {
 	HWND tconsole = GetConsoleWindow();
@@ -1281,7 +1322,7 @@ int main()
 {
 
 	//TODO: remove all paths to D and E
-	PlaySound(TEXT("D:/bgsoundc.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+	//PlaySound(TEXT("D:/bgsoundc.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 	// Testing Code, will be removed
 	/*HWND tconsole = GetConsoleWindow();
 	HANDLE tconsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1333,7 +1374,7 @@ int main()
 
 	float dpi = GetDpiForSystem();
 	float wdpi = GetDpiForWindow(console);
-	
+
 	dpiRatio = wdpi / dpi;
 
 	SetProcessDPIAware();
@@ -1361,7 +1402,7 @@ int main()
 
 	getWindowDimensions(gameWidth, gameHeight);
 	getConsoleWindowDimensions(consoleCols, consoleRows);
-	BALL_FORCE = gameHeight / 110;
+	BALL_FORCE = gameHeight / 140;
 	showConsoleCursor(false);
 	cls();
 
@@ -1377,10 +1418,11 @@ int main()
 	info.ColorTable[0] = RGB(COLORS.Black.R, COLORS.Black.G, COLORS.Black.B);
 	info.ColorTable[2] = RGB(COLORS.Green.R, COLORS.Green.G, COLORS.Green.B);
 	info.ColorTable[4] = RGB(COLORS.Red.R, COLORS.Red.G, COLORS.Red.B);
+	info.ColorTable[5] = RGB(COLORS.Purple.R, COLORS.Purple.G, COLORS.Purple.B);
 	info.ColorTable[7] = RGB(COLORS.White.R, COLORS.White.G, COLORS.White.B);
 
 	info.bFullscreenSupported = true;
-	info.dwSize.X = consoleCols + 1; 
+	info.dwSize.X = consoleCols + 1;
 	info.dwSize.Y = consoleRows + 2;
 	info.srWindow.Top = 0;
 	info.srWindow.Bottom = consoleRows + 1;
@@ -1389,8 +1431,8 @@ int main()
 
 	SetConsoleScreenBufferInfoEx(consoleHandle, &info);
 
-	#pragma region Main Menu
-	
+#pragma region Main Menu
+
 	Clear();
 
 	printHighScores();
@@ -1399,8 +1441,8 @@ int main()
 
 	// since the loop runs too fast
 	// we handle input when it is detected multiple times
-	int holder = 0; 
-	
+	int holder = 0;
+
 	while (true) // Menu Loop
 	{
 		char c = getKey();
@@ -1411,7 +1453,7 @@ int main()
 			Clear();
 			getWindowDimensions(gameWidth, gameHeight);
 			UpdateFontSize(8);
-			
+
 			printHighScores();
 
 			printMenuItems();
@@ -1467,10 +1509,10 @@ int main()
 
 		delay(10);
 	}
-	
 
-	#pragma endregion
-	
+
+#pragma endregion
+
 
 	// TODO: test and udpate
 	system("color 07");
@@ -1495,7 +1537,7 @@ int main()
 		float extraSpace = (((float)gameWidth / (float)BricksColCount) - brickWidth) * BricksColCount;
 
 
-		
+
 		/*drawRectangle(0, 0, extraSpace / 2, gameHeight, COLORS.Black);
 		drawRectangle(gameWidth - extraSpace / 2, 0, gameWidth, gameHeight, COLORS.Black);
 		drawRectangle(0, gameHeight - 10, gameWidth, gameHeight, COLORS.Black);*/
@@ -1511,7 +1553,7 @@ int main()
 				brick.height = brickHeight;
 
 				brick.x = c * brick.width + extraSpace / 2;
-				brick.y = r * brick.height + TopRowHeight ;
+				brick.y = r * brick.height + TopRowHeight;
 
 				if (c == 0)
 				{
@@ -1524,12 +1566,12 @@ int main()
 					brick.width += extraSpace;
 				}
 
-				brick.health = (rand() % 4) ;
+				brick.health = (rand() % 4);
 
 				bricks[r][c] = brick;
 			}
 		}
-	
+
 		DrawBricks();
 	}
 
@@ -1539,7 +1581,7 @@ int main()
 	int framecount = 0;
 	time_t t = time(NULL);
 
-	holder = 0; 
+	holder = 0;
 
 	// Game Loop
 	while (!GameManager.Over)
@@ -1548,24 +1590,28 @@ int main()
 
 		if (c == WINDOW_FOCUS_CHANGED)
 		{
-			if (GameManager.paused)
-			{
-				delay(200);
-				RedrawGame();
-				GameManager.paused = false;
-			}
-			else
-				GameManager.paused = true;
+			GameManager.paused = true;
+
+			delay(500);
+			RedrawGame();
+
+			gotoxy(consoleCols / 2 - strlen("SAVE   RESUME") / 2, 0);
+			cout << "\033[7mS\033[27mAVE   \033[7mR\033[27mESUME\033[27m";
 		}
 		else if (onKey('p', c))
 		{
-			holder++;
+			GameManager.paused = true;
 
-			if (holder > 1)
-			{
-				GameManager.paused = !GameManager.paused;
-				holder = 0;
-			}
+			gotoxy(consoleCols / 2 - strlen("SAVE   RESUME") / 2, 0);
+			cout << "\033[7mS\033[27mAVE   \033[7mR\033[27mESUME\033[27m";
+		}
+		else if (onKey('r', c))
+		{
+			GameManager.paused = false;
+
+
+			gotoxy(consoleCols / 2 - strlen("SAVE   PAUSE ") / 2, 0);
+			cout << "\033[7mS\033[27mAVE   \033[7mP\033[27mAUSE \033[27m";
 		}
 
 		if (!GameManager.paused) // Draw only if game is not paused
@@ -1592,7 +1638,7 @@ int main()
 
 			if (c == ' ' && !GameManager.started)
 			{
-				ball.force_x =  BALL_FORCE * cos(((rand() % 180 - 40) + 20) * 3.14 / 180);
+				ball.force_x = BALL_FORCE * cos(((rand() % 180 - 40) + 20) * 3.14 / 180);
 				ball.force_y = -BALL_FORCE * sin(((rand() % 180 - 40) + 20) * 3.14 / 180);
 
 				GameManager.started = true;
@@ -1602,19 +1648,32 @@ int main()
 			else if (onKey('a', c) || onKey(KEY_LEFT, c)) player.force_x = -PLAYER_SPEED;
 
 			// TODO: For testing, will be removed
-			else if (c == 'j') ball.force_x = -3;
-			else if (c == 'l') ball.force_x = 3;
-			else if (c == 'i') ball.force_y = -3;
-			else if (c == 'k') ball.force_y = 3;
+			else if (c == 'j') {
+				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
+
+				ball.force_x = -5;
+			}
+			else if (c == 'l') {
+				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
+				ball.force_x = 5;
+			}
+			else if (c == 'i') {
+				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
+				ball.force_y = -5;
+			}
+			else if (c == 'k') {
+				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
+				ball.force_y = 5;
+			}
 		}
 
-		if (c == ';') SaveGameState();
+		if (onKey('s', c)) SaveGameState();
 		//else if (c == '\'') LoadGameState();
 
 		// TODO: For testing, will be removed
 		else if (c == 'f') setFireball(true);
 		else if (c == 'g') setFireball(false);
-		else if (c == 'r') RedrawGame();
+		else if (c == 'y') RedrawGame();
 		else if (c == 't')
 		{
 			projectile.x = player.x + player.width / 2;
@@ -1673,12 +1732,10 @@ int main()
 	UpdateFontSize(8);
 	getConsoleWindowDimensions(consoleCols, consoleRows);
 
-	bool newHigh = AddScore(GameManager.score);
-
 	// Checking wheather player won or lost
 	if (player.lives > 0) // player won
 	{
-		TransitionDown( COLORS.Red, COLORS.Green);
+		TransitionDown(COLORS.Red, COLORS.Green);
 
 		drawRectangle(0, 0, gameWidth, gameHeight, COLORS.Green);
 
@@ -1688,23 +1745,23 @@ int main()
 	}
 	else // player lost
 	{
-		TransitionDown( COLORS.Green, COLORS.Red);
+		TransitionDown(COLORS.Green, COLORS.Red);
 
 		drawRectangle(0, 0, gameWidth, gameHeight, COLORS.Red);
 
 		system("color 47");
 
-		PrintCenter(newHigh ? 2 : 3, "\033[31;47m", " YOU LOST! ", "");
+		PrintCenter(3, "\033[31;47m", " YOU LOST! ", "");
 	}
 
 	string scoreString = " SCORE " + to_string(GameManager.score) + " ";
 
 	if (scoreString.length() % 2 == 0) scoreString = " SCORE  " + to_string(GameManager.score) + " ";
 
-	PrintCenter(newHigh ? 4 : 5, "\033[30;47;29;7m", scoreString, "\033[27m");
+	PrintCenter(5, "\033[30;47;29;7m", scoreString, "\033[27m");
 
 	// Updating Highscores file if the score is in top 5
-	if (newHigh)
+	if (AddScore(GameManager.score))
 	{
 		SaveHighScores();
 
