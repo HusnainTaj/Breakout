@@ -689,7 +689,6 @@ void DrawProjectile()
 	}
 }
 
-
 void DrawHeart(int x1, int y1, int scale, Color color) {
 	// x1 and y1 coordinate of leftmost corner and it takes scale 
 	// scale determines size of heart
@@ -1252,6 +1251,7 @@ void UpdateFontSizePx(int fHeight)
 
 int main()
 {
+	
 	PlaySound(MAKEINTRESOURCE(IDR_WAVE1), NULL, SND_RESOURCE | SND_ASYNC | SND_LOOP);
 
 	//TODO: remove all paths to D and E
