@@ -383,15 +383,15 @@ void HandleBrickCollission(Ball& ball)
 						int randomChance = rand() % 100;
 						
 						if (randomChance < 5) // 5
-							powerUp.type = PowerUpTypes.projectile;
-						else if (randomChance >= 5 && randomChance < 10) // 5
 						{
 							powerUp.type = PowerUpTypes.life;
 							powerUp.color = COLORS.Red;
 						}
-						else if(randomChance >= 10 && randomChance < 25) // 15
+						else if (randomChance >= 5 && randomChance < 20) // 15
+							powerUp.type = PowerUpTypes.projectile;
+						else if(randomChance >= 20 && randomChance < 50) // 30
 							powerUp.type = PowerUpTypes.fireball;
-						else if (randomChance >= 25 && randomChance < 100) // 75
+						else if (randomChance >= 50 && randomChance < 100) // 50
 							powerUp.type = onChance(50) ? PowerUpTypes.elongate : PowerUpTypes.shorten;
 
 						powerUp.dropping = true;
@@ -534,8 +534,6 @@ void Clear(Color bg = COLORS.Back)
 void DrawPlayer(bool redraw = false)
 {
 	if (redraw) drawRectangle(0, player.y, gameWidth, player.y + player.height, COLORS.Back);
-
-	if (player.force_x == 0 && ball.y < player.y - 100) return;
 
 	// Removing old paddle
 	if (player.x + player.width > gameWidth)
@@ -729,10 +727,10 @@ void DrawLives()
 }
 
 int lastScore = -1;
-void DrawScore()
+void DrawScore(bool force = false)
 {
 	// only print new score if the score has changed
-	if (lastScore != GameManager.score)
+	if (lastScore != GameManager.score || force)
 	{
 		string a = to_string(GameManager.score);
 		gotoxy(0, 0);
@@ -1556,6 +1554,12 @@ int main()
 
 			DrawScore();
 
+			if (!GameManager.started)
+			{
+				gotoxy(consoleCols / 2 - strlen("PRESS SPACE TO START") / 2, 0);
+				cout << "PRESS SPACE TO START";
+			}
+			
 			if (ball.y > gameHeight)
 			{
 				player.lives--;
@@ -1566,11 +1570,15 @@ int main()
 				if (player.lives <= 0) GameManager.Over = true;
 			}
 
+
 			if (c == ' ' && !GameManager.started)
 			{
-				ball.force_x = BALL_FORCE * cos(((rand() % 180 - 40) + 20) * 3.14 / 180);
-				ball.force_y = -BALL_FORCE * sin(((rand() % 180 - 40) + 20) * 3.14 / 180);
+				ball.force_x = BALL_FORCE * cos((rand() % (180 - 40) + 20) * 3.14 / 180);
+				ball.force_y = -BALL_FORCE * sin((rand() % (180 - 40) + 20) * 3.14 / 180);
 
+				gotoxy(consoleCols / 2 - strlen("PRESS SPACE TO START") / 2, 0);
+				cout <<	"                      ";
+				DrawScore(true);
 				GameManager.started = true;
 			}
 
@@ -1598,9 +1606,9 @@ int main()
 		}
 
 		if (onKey('s', c)) SaveGameState();
-		//else if (c == '\'') LoadGameState();
 
 		// TODO: For testing, will be removed
+		//else if (c == '\'') LoadGameState();
 		else if (c == 'f') setFireball(true);
 		else if (c == 'g') setFireball(false);
 		else if (c == 'y') RedrawGame();
@@ -1655,12 +1663,12 @@ int main()
 #pragma endregion
 	}
 
-	TransitionUp(COLORS.Back, COLORS.Purple);
-
 	system("color 70");
 	Clear();
 	UpdateFontSize(8);
 	getConsoleWindowDimensions(consoleCols, consoleRows);
+
+
 
 	// Checking wheather player won or lost
 	if (player.lives > 0) // player won
