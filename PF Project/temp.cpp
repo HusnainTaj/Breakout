@@ -1,547 +1,357 @@
 //#include<iostream>
-//#include"yourgraphics.h"
-//#include<cstdlib>
 //#include<fstream>
-//using namespace std;
-//char c;
+//#include<conio.h>
+//#include<cstdlib>
+//#include<time.h>
+//#include "youregraphics.h"
+//int wi = 0, h = 0;
+//int w = 106, screenheight = 29;
+//int brikWidth = 0;
+//int bx = 0, by = 0;
 //
-//
-//int lives = 3;
-//int score = 0;
-//int check = 0;
-//int hs[6] = { 0,0,0,0,0,0 };
-//int highscore;
-//
-//
-//
-//
-//int screenWidth, screenHeight;
-//struct rect
+//void live(int life)
 //{
+//	int change = 3;
+//	int i = 0;
+//	int lx1 = wi - 25 * 3 - 20, ly1 = h - 20 - 20;
 //
-//	int x1 = 0;
-//	int y1 = 0;
-//	int x2 = 0;
-//	int y2 = 0;
-//	int health;
-//
-//
-//}pad, brick[15][10];
-//struct ellipse
-//{
-//
-//	int x1 = 520;
-//	int y1 = 300;
-//	int x2 = x1 + 30;
-//	int y2 = y1 + 30;
-//	int velocityX = 0;
-//	int velocityY = 2;
-//
-//}ball;
-//void paddlemovement(int l)
-//{
-//	c = getKey();
-//	if (pad.x1 > 0 && pad.x2 < l)
+//	while (i < 3)
 //	{
+//		drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20 , 255, 255, 255, 0, 0, 0);
+//		lx1 = lx1 + 20;
+//		i++;
 //
-//		if (c == 'd')
-//		{
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 0, 0, 0);
-//
-//			pad.x1 += 25;
-//			pad.x2 += 25;
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 255, 255, 0);
-//
-//		}
-//
-//		if (c == 'a')
-//		{
-//
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 0, 0, 0);
-//
-//			pad.x1 -= 25;
-//			pad.x2 -= 25;
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 255, 255, 0);
-//
-//		}
 //	}
-//	else if (pad.x1 <= 0)
+//
+//	lx1 = wi - 25 * 3 - 20, ly1 = h - 20 - 20;
+//	i = 0;
+//	while (i < life)
 //	{
-//
-//		if (c == 'd')
-//		{
-//
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 0, 0, 0);
-//
-//			pad.x1 += 25;
-//			pad.x2 += 25;
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 255, 255, 0);
-//
-//		}
+//		drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20, 0, 0, 255, 255, 153, 0);
+//		lx1 = lx1 + 20;
+//		i++;
 //	}
-//	else if (pad.x2 >= l)
-//	{
 //
-//		if (c == 'a')
-//		{
-//			cout << "yahi";
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 0, 0, 0);
-//			pad.x1 -= 25;
-//			pad.x2 -= 25;
-//			drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 255, 255, 0);
-//		}
-//	}
-//}
+//	//if (life == 3)
+//	//	while (i < 3)
+//	//	{
+//	//		drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20, 0, 0, 255, 255, 153, 0);
+//	//		lx1 = lx1 + 20;
+//	//		i++;
+//	//	}
+//	//if (life == 2) {
+//	//	while (i < 2)
+//	//	{
+//	//		drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20, 0, 0, 255, 255, 153, 0);
+//	//		lx1 = lx1 + 20;
+//	//		i++;
+//	//	}
+//	//	drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20 , 255, 255, 255, 0, 0, 0);
+//	//}
+//	//if (life == 1) {
+//	//	drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20 , 0, 0, 255, 255, 153, 0);
+//	//	lx1 = lx1 + 20;
+//	//	while (i < 2)
+//	//	{
+//	//		drawEllipse(lx1 + i * 5, ly1, lx1 + 20 + i * 5, ly1 + 20 , 255, 255, 255, 0, 0, 0);
+//	//		lx1 = lx1 + 20;
+//	//		i++;
+//	//	}
 //
-//void save()
-//{
-//	ofstream write("storage.txt");
-//	write << pad.x1 << " " << pad.x2 << " " << pad.y1 << " " << pad.y2 << " " << ball.x1 << " " << ball.x2 << " " << ball.y1 << " " << ball.y2 << " " << lives << " " << score << " ";
-//	for (int i = 0; i < 15; i++)
-//	{
-//		for (int j = 0; j < 10; j++)
-//		{
-//			write << brick[i][j].x1 << " " << brick[i][j].x2 << " " << brick[i][j].y1 << " " << brick[i][j].y2 << " " << brick[i][j].health << " ";
-//
-//		}
-//	}
-//	write.close();
-//}
-//
-//void load()
-//{
-//	ifstream read("storage.txt");
-//	if (read)
-//	{
-//		read >> pad.x1 >> pad.x2 >> pad.y1 >> pad.y2 >> ball.x1 >> ball.x2 >> ball.y1 >> ball.y2 >> lives >> score;
-//		for (int i = 0; i < 15; i++)
-//		{
-//			for (int j = 0; j < 10; j++)
-//			{
-//				read >> brick[i][j].x1 >> brick[i][j].x2 >> brick[i][j].y1 >> brick[i][j].y2 >> brick[i][j].health;
-//
-//			}
-//		}
-//		read.close();
-//	}
+//	//}
 //
 //}
-//
-//void quit()
-//{
-//	if (c == 'q')
+//void collision(int& ballx, int& bally, int& playerx, int& playery, int& by, int brickh[5][10], int bricky[5][10], int brickx[5][10]) {
+//	if (
+//		ballx < playerx + 100 &&
+//		ballx + 10 > playerx &&
+//		bally < playery + 10 &&
+//		bally + 10 > playery
+//		)
 //	{
-//		cls();
-//		gotoxy(55, 14);
-//		cout << "GAME QUITTED";
-//		delay(100000);
-//
-//	}
-//}
-//
-//void pause()
-//{
-//	if (c == 'p')
-//		while (1)
-//		{
-//			c = getKey();
-//			if (c == 'r')
-//			{
-//				break;
-//			}
-//		}
-//}
-//
-//void respawn()
-//{
-//	if (ball.y2 > pad.y2 + 70)
-//	{
-//		lives--;
-//		if (lives == 2)
-//		{
-//			drawEllipse(900, 38, 930, 65, 0, 0, 0, 0, 0, 0);
-//
-//		}
-//		else if (lives == 1)
-//		{
-//			drawEllipse(850, 38, 880, 65, 0, 0, 0, 0, 0, 0);
-//
-//		}
-//		else if (lives == 0)
-//		{
-//			drawEllipse(800, 38, 830, 65, 0, 0, 0, 0, 0, 0);
-//
-//		}
-//		ball.x1 = 520;
-//		ball.y1 = 300;
-//		ball.x2 = ball.x1 + 30;
-//		ball.y2 = ball.y1 + 30;
-//		ball.velocityX = 0;
-//		ball.velocityY = 2;
+//		if (by > 0)
+//			bally = playery - 11;
+//		else
+//			bally = playery + 16;
 //
 //
-//		drawEllipse(ball.x1, ball.y1, ball.x2, ball.y2, 0, 0, 0, 255, 255, 255);
-//		delay(400);
-//
-//
-//	}
-//}
-//
-//void gameover()
-//{
-//	if (lives == 0)
-//	{
-//
-//
-//
-//		cls();
-//		gotoxy(55, 14);
-//		cout << "GAME OVER" << endl;
-//		delay(1000000);
-//
+//		by *= -1;
 //	}
 //
-//}
-//
-//void gamewon()
-//{
-//	if (check == 100)
+//	for (int y = 0; y < 5; y++)
 //	{
-//		cls();
-//		gotoxy(45, 14);
-//		cout << "CONGRATULATIONS.....YOU HAVE WON";
-//		delay(100000);
+//		for (int x = 0; x < 10; x++) {
+//			if (brickh[y][x] != 0) {
+//				if (
+//					ballx + bx * 3 < brickx[y][x] + brikWidth &&
+//					ballx + bx * 3 + 10 > brickx[y][x] &&
+//					bally + by * 3 < bricky[y][x] + 15 &&
+//					bally + by * 3 + 10 > bricky[y][x]
+//					) {
+//					by *= -1;
+//					brickh[y][x]--;
 //
-//	}
-//}
-//
-//void highestscore()
-//{
-//
-//
-//
-//
-//}
-//
-//int main()
-//{
-//	char z;
+//					int gap = 5;
 //
 //
-//	SetProcessDPIAware();
-//	getWindowDimensions(screenWidth, screenHeight);
-//	cls();
-//	pad.x1 = 450;
-//	pad.y1 = screenHeight - 40;
-//	pad.x2 = pad.x1 + 200;
-//	pad.y2 = pad.y1 + 15;
+//					if (brickh[y][x] == 0) {
 //
-//	for (int i = 0; i < 6; i++)
-//	{
-//		cout << hs[i] << endl;
-//	}
-//	cout << "Press n for NEW GAME" << endl;
-//	cout << "Press l to LOAD GAME" << endl;
-//	cin >> z;
-//	cls();
-//
-//	brick[0][0].x1 = 0;
-//	brick[0][0].y1 = 60;
-//	brick[0][0].x2 = brick[0][0].x1 + screenWidth / 10;
-//	brick[0][0].y2 = brick[0][0].y1 + 20;
-//
-//	for (int i = 4, k = 60; i < 15; i++)
-//	{
-//
-//		for (int j = 0; j < 10; j++)
-//		{
-//			brick[i][j].health = (rand() % (5 - 3 + 1)) + 3;
-//
-//			brick[i][j].x1 = brick[0][0].x1 + (j * (screenWidth / 10));
-//			brick[i][j].y1 = (i * k);
-//			brick[i][j].x2 = brick[i][j].x1 + screenWidth / 10;
-//			brick[i][j].y2 = (i + 1) * 20;
-//		}
-//
-//		k = 20;
-//	}
-//
-//	if (z == 'l')
-//	{
-//		load();
-//	}
-//
-//	ifstream readhs("highscore.txt");
-//	for (int i = 1; i < 6; i++)
-//	{
-//		readhs >> hs[i];
-//	}
-//	highscore = hs[5];
-//
-//
-//	gotoxy(80, 2);
-//	cout << "Lives:";
-//	gotoxy(10, 2);
-//	cout << "Score:" << score;
-//	gotoxy(30, 2);
-//	cout << "High Score : " << highscore;
-//
-//	drawRectangle(0, 0, screenWidth, screenHeight, 0, 0, 0, 0, 0, 0);
-//	gotoxy(0, 0);
-//	if (lives == 3)
-//	{
-//
-//		drawEllipse(800, 38, 830, 65, 204, 0, 0, 204, 0, 0);
-//		drawEllipse(850, 38, 880, 65, 204, 0, 0, 204, 0, 0);
-//		drawEllipse(900, 38, 930, 65, 204, 0, 0, 204, 0, 0);
-//	}
-//	else if (lives == 2)
-//	{
-//		drawEllipse(800, 38, 830, 65, 204, 0, 0, 204, 0, 0);
-//		drawEllipse(850, 38, 880, 65, 204, 0, 0, 204, 0, 0);
-//	}
-//	else if (lives == 1)
-//	{
-//		drawEllipse(800, 38, 830, 65, 204, 0, 0, 204, 0, 0);
-//
-//	}
-//
-//
-//
-//	showConsoleCursor(false);
-//
-//	//loop for printing the bricks
-//	for (int i = 4, k = 60; i < 15; i++)
-//	{
-//
-//		for (int j = 0; j < 10; j++)
-//		{
-//			if (brick[i][j].health >= 3)
-//			{
-//
-//				drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 255, 0, 0);
-//			}
-//			if (brick[i][j].health == 2)
-//			{
-//				drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 69, 82, 69);
-//
-//			}
-//			if (brick[i][j].health == 1)
-//			{
-//				drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 142, 86, 190);
-//
-//			}
-//			if (brick[i][j].health == 0)
-//			{
-//				drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 0, 0, 0);
-//
-//			}
-//		}
-//	}
-//
-//
-//
-//
-//	//printing paddle
-//	drawRectangle(pad.x1, pad.y1, pad.x2, pad.y2, 0, 0, 0, 255, 255, 0);
-//
-//
-//	int r = 23;
-//	int g = 98;
-//	int b = 42;
-//
-//	//main loop
-//	while (true)
-//	{
-//		drawLine(0, 10, screenWidth, 10, 255, 0, 0);
-//		drawLine(0, 90, screenWidth, 90, 255, 0, 0);
-//		drawLine(screenWidth / 2, 0, screenWidth / 2, 90, 255, 0, 0);
-//		drawLine(0, 0, 0, screenHeight, 255, 0, 0);
-//		drawLine(screenWidth, 0, screenWidth, screenHeight, 255, 0, 0);
-//		//moving the paddle
-//
-//		paddlemovement(screenWidth);
-//		drawEllipse(ball.x1, ball.y1, ball.x2, ball.y2, 0, 0, 0, 0, 0, 0);
-//		ball.x1;
-//		ball.x2;
-//		ball.y1 += ball.velocityY;
-//		ball.y2 += ball.velocityY;
-//
-//		drawEllipse(ball.x1, ball.y1, ball.x2, ball.y2, 0, 0, 0, 255, 255, 255);
-//		if (ball.x2 >= pad.x1 + 95 && ball.x1 <= pad.x1 + 105 && ball.y2 >= pad.y1)
-//		{
-//			ball.velocityX = 0;
-//			ball.velocityY = -2;
-//		}
-//		else if ((ball.x1 >= pad.x1 + 105 && ball.x1 <= pad.x1 + 150 && ball.y2 >= pad.y1))
-//		{
-//			ball.velocityX = 1;
-//			ball.velocityY = -2;
-//		}
-//		else if ((ball.x1 >= pad.x1 + 105 && ball.x1 <= pad.x2 && ball.y2 >= pad.y1))
-//		{
-//			ball.velocityX = 2;
-//			ball.velocityY = -2;
-//		}
-//		else if (ball.x2 >= pad.x1 + 45 && ball.x2 <= pad.x1 + 95 && ball.y2 >= pad.y1)
-//		{
-//			ball.velocityX = -1;
-//			ball.velocityY = -2;
-//		}
-//		else if (ball.x2 >= pad.x1 && ball.x2 <= pad.x1 + 45 && ball.y2 >= pad.y1)
-//		{
-//			ball.velocityX = -2;
-//			ball.velocityY = -2;
-//		}
-//		if (ball.x1 < 0 || ball.x2 > screenWidth) {
-//			ball.velocityX *= -1;
-//		}
-//		else if (ball.y1 < 93)
-//		{
-//			ball.velocityY *= -1;
-//		}
-//
-//		drawEllipse(ball.x1, ball.y1, ball.x2, ball.y2, 0, 0, 0, 0, 0, 0);
-//		ball.x1 += ball.velocityX;
-//		ball.x2 += ball.velocityX;
-//		ball.y1 += ball.velocityY;
-//		ball.y2 += ball.velocityY;
-//		drawEllipse(ball.x1, ball.y1, ball.x2, ball.y2, 0, 0, 0, 255, 255, 255);
-//		ball.velocityX == 1;
-//		ball.velocityY == 2;
-//		delay(10);
-//
-//		for (int i = 4; i < 15; i++)
-//		{
-//			for (int j = 0; j < 10; j++)
-//			{
-//				if (brick[i][j].health > 0)
-//				{
-//					if (ball.x2 + ball.velocityX > brick[i][j].x1 && ball.x1 + ball.velocityX<brick[i][j].x2 && ball.y2>brick[i][j].y1 && ball.y1 < brick[i][j].y2)
-//					{
-//						brick[i][j].health--;
-//						ball.velocityX *= -1;
-//
-//						score++;
-//						gotoxy(10, 2);
-//						cout << "Score:" << score;
-//						gotoxy(0, 0);
-//						if (brick[i][j].health == 2)
-//						{
-//							drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 69, 82, 69);
-//						}
-//						else if (brick[i][j].health == 1)
-//						{
-//							drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 142, 86, 190);
-//						}
-//
-//
-//						else if (brick[i][j].health == 0)
-//						{
-//							drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 0, 0, 0);
-//							check++;
-//						}
-//
+//						drawRectangle(brickx[y][x], bricky[y][x], brickx[y][x] + brikWidth, bricky[y][x] + 25, 0, 0, 0, 0, 0, 0);
+//					
 //					}
-//					else if (ball.x2 > brick[i][j].x1 && ball.x1  < brick[i][j].x2 && ball.y2 + ball.velocityY> brick[i][j].y1 && ball.y1 + ball.velocityY < brick[i][j].y2)
-//					{
-//						brick[i][j].health--;
-//						ball.velocityY *= -1;
-//
-//						score++;
-//						gotoxy(10, 2);
-//						cout << "Score:" << score;
-//						gotoxy(0, 0);
-//						if (brick[i][j].health == 2)
-//						{
-//							drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 69, 82, 69);
-//						}
-//						else if (brick[i][j].health == 1)
-//						{
-//							drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 142, 86, 190);
-//						}
-//
-//
-//						else if (brick[i][j].health == 0)
-//						{
-//							drawRectangle(brick[i][j].x1, brick[i][j].y1, brick[i][j].x2, brick[i][j].y2, 0, 0, 0, 0, 0, 0);
-//						}
-//					}
+//					else if (brickh[y][x] == 2)
+//						drawRectangle(brickx[y][x], bricky[y][x] + gap, brickx[y][x] + brikWidth - gap, bricky[y][x] + 25, 255, 75, 184, 0, 255, 72);
+//					else 
+//						drawRectangle(brickx[y][x], bricky[y][x] + gap, brickx[y][x] + brikWidth - gap, bricky[y][x] + 25, 64, 75, 184, 0, 255, 72);
 //
 //				}
-//
 //			}
 //		}
-//		if (ball.y2 > pad.y2 + 70)
-//		{
-//			lives--;
-//			if (lives == 2)
-//			{
-//				drawEllipse(900, 38, 930, 65, 0, 0, 0, 0, 0, 0);
-//
-//			}
-//			else if (lives == 1)
-//			{
-//				drawEllipse(850, 38, 880, 65, 0, 0, 0, 0, 0, 0);
-//
-//			}
-//			ball.x1 = 520;
-//			ball.y1 = 300;
-//			ball.x2 = ball.x1 + 30;
-//			ball.y2 = ball.y1 + 30;
-//			ball.velocityX = 0;
-//			ball.velocityY = 2;
-//
-//
-//			drawEllipse(ball.x1, ball.y1, ball.x2, ball.y2, 0, 0, 0, 255, 255, 255);
-//			delay(400);
-//
-//
-//		}
-//		if (score > highscore)
-//		{
-//			highscore = score;
-//		}
-//		gotoxy(30, 2);
-//		cout << "High Score : " << highscore;
-//
-//		if (c == 's')
-//		{
-//			save();
-//		}
-//
-//		respawn();
-//
-//		pause();
-//
-//		quit();
-//
-//		gameover();
-//
-//		gamewon();
-//
 //	}
+//}
 //
-//	int current = score;
+//using namespace std;
 //
-//	hs[0] = score;
 //
-//	for (int i = 0; i < 6; i++)
+//int main() {
+//	srand(time(NULL));
+//	// initialising
+//
+//	int lives = 3;
+//	int startball = 0;
+//	int dir = 1; // 1- topright(for wall x+w>=x,x+W<x+w,y>=yy<y+h), 2- topleft(for wall,,,x>=x,x<x+w,y>=y,y<y+h), 3- bottomleft(for ball x+w>=x,x+W<x+w,y>=yy<y+h, 4-bottomright (for ball,,,x>=x,x<x+w,y>=y,y<y+h)
+//	int bricksleft = 50;
+//	int win = 0;
+//	int lose = 0;
+//
+//	SetProcessDPIAware();
+//	int row = 0, col = 0;
+//	getWindowDimensions(wi, h);
+//	getConsoleWindowDimensions(row, col);
+//
+//	cls();
+//	showConsoleCursor(false);
+//
+//	delay(100);
+//
+//
+//	brikWidth = wi / 10;
+//	bool reload = false;
+//	int gap = 5;
+//	int top = 40;
+//
+//	int bricksx[5][10];
+//	int bricksy[5][10];
+//	int bricksh[5][10];
+//
+//	for (int y = 0; y < 5; y++)
 //	{
-//		for (int j = 0; j < 5; j++)
+//		for (int x = 0; x < 10; x++)
 //		{
-//			if (hs[j] > hs[j + 1])
-//			{
-//				int temp = hs[j + 1];
-//				hs[j + 1] = hs[j];
-//				hs[j] = temp;
-//			}
+//			bricksx[y][x] = x * brikWidth;
+//			bricksy[y][x] = 25 * y + top;
+//
+//			if(y == 0 || y == 1)
+//				bricksh[y][x] = rand() % 3 + 1;
+//			else bricksh[y][x] = 3;
+//
 //		}
 //	}
 //
-//	ofstream writehs("highscore.txt");
-//	for (int i = 1; i < 6; i++)
-//	{
-//		writehs << hs[i] << " ";
+//	int playerx = 350, playery = 390, ballx = 390, bally = 360;
+//	char c = 'c';
+//
+//
+//
+//
+//	int px = 0;
+//
+//	bool started = false;
+//	//promt to reload
+//
+//	ifstream saves("save.txt");
+//
+//	if (saves.is_open()) {
+//		char question = '3';
+//		cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n                         INPUT 1 TO RELOAD OLD SAVE AND 2 TO START A NEW GAME";
+//		do {
+//			question = getKey();
+//			if (question == '1')
+//				reload = true;
+//		} while (question != '1' && question != '2');
+//
+//		if (reload) {
+//			saves >> lives;
+//			saves >> ballx;
+//			saves >> bx;
+//			saves >> bally;
+//			saves >> by;
+//			saves >> playerx;
+//			saves >> px;
+//			saves >> playery;
+//			saves >> bricksleft;
+//			for (int y = 0; y < 5; y++)
+//			{
+//				for (int x = 0; x < 10; x++)
+//				{
+//					saves >> bricksx[y][x];
+//					saves >> bricksy[y][x];
+//					saves >> bricksh[y][x];
+//				}
+//			}
+//		}
+//		saves.close();
 //	}
+//
+//	delay(200);
+//	cls();
+//	cout << "\n\n                                      YOU READY?";
+//	delay(1500);
+//	cls();
+//	cout << " BUCKLE UP";
+//	delay(1500);
+//	cls();
+//	cout << " LETS GO";
+//	delay(1500);
+//	cls();
+//	drawRectangle(0, 0, wi, h, 255, 255, 255, 0, 0, 0);
+//
+//	for (int y = 0; y < 5; y++)
+//	{
+//		for (int x = 0; x < 10; x++)
+//		{
+//			if (bricksh[y][x] != 0)
+//				drawRectangle(bricksx[y][x], bricksy[y][x] + gap, bricksx[y][x] + brikWidth - gap, bricksy[y][x] + 25, 64, 75, 184, 0, 255, 72);
+//		}
+//	}
+//
+//	while (lives > 0)
+//	{
+//		live(lives);
+//		while (true)
+//		{
+//
+//			drawEllipse(ballx, bally, ballx + 10, bally + 10, 0, 0, 0, 0, 0, 0);
+//			if (c == ' ' && !started) {
+//				bx = (rand() % 10) - 5;
+//				if (bx == 0) { bx = 1; }
+//
+//				by = -4;//( rand() % 7) - 3;
+//
+//				// if (by == 0 && by >= 0) { by *= -1; }
+//
+//				started = true;
+//			}
+//
+//
+//			if (ballx < 0) {
+//				ballx = 0;
+//				bx *= -1;
+//
+//			}
+//			if (ballx + 10 > wi) {
+//				ballx = wi - 10;
+//				bx *= -1;
+//			}
+//			if (bally < 0) {
+//				bally = 0;
+//				by *= -1;
+//
+//			}
+//			if (bally + 11 > h) {
+//				/*bally = h - 21;
+//				by *= -1;*/
+//				lives--;
+//				live(lives);
+//				drawRectangle(playerx, playery, playerx + 100, playery + 15, 0, 0, 0, 0, 0, 0);
+//				delay(1000);
+//				playerx = 350, playery = 390, ballx = 390, bally = 360;
+//				if (lives == 0) break;
+//			}
+//
+//			collision(ballx, bally, playerx, playery, by, bricksh, bricksy, bricksx);
+//
+//			ballx += bx;
+//			bally += by;
+//
+//			//if (ballx <= playerx && ballx + ballx + 21 < playerx && bally <= playery && bally + bally + 21 >= playery) {
+//			//    //ballx = playerx + playerx + 100;
+//			//    by *= -1;
+//			//}
+//
+//
+//			drawEllipse(ballx, bally, ballx + 10, bally + 10, 255, 0, 0, 255, 0, 0);
+//
+//			//collision
+//
+//
+//			drawRectangle(playerx, playery, playerx + 100, playery + 15, 0, 0, 0, 0, 0, 0);
+//
+//			c = getKey();
+//			//if (c == 32) { startball = 1; }
+//			if (c == 'q')break;
+//
+//			if (c == 'd') {
+//				px = 30;
+//			}
+//
+//			if (c == 'a') {
+//				px = -30;
+//			}
+//			if (c == 'p')
+//			{
+//				while (c != 'r')
+//				{
+//					delay(1);
+//					c = getKey();
+//				}
+//			}
+//
+//			if (c == 's') {
+//
+//				ofstream saves("save.txt");
+//
+//
+//				saves << lives << " ";
+//				saves << ballx << " ";
+//				saves << bx << " ";
+//				saves << bally << " ";
+//				saves << by << " ";
+//				saves << playerx << " ";
+//				saves << px << " ";
+//				saves << playery << " ";
+//				saves << bricksleft << " ";
+//				for (int y = 0; y < 5; y++)
+//				{
+//					for (int x = 0; x < 10; x++)
+//					{
+//						saves << bricksx[y][x] << " ";
+//						saves << bricksy[y][x] << " ";
+//						saves << bricksh[y][x] << " ";
+//					}
+//				}
+//				saves.close();
+//			}
+//
+//			playerx += px;
+//			px = 0;
+//
+//			if (playerx < 0) { playerx = 0; }
+//			else if (playerx + 100 > wi) { playerx = wi - 100; }
+//
+//			drawRectangle(playerx, playery, playerx + 100, playery + 15, 255, 0, 0, 255, 0, 0);
+//
+//			delay(10);
+//
+//
+//		}
+//	}
+//	gotoxy(w + 1, screenheight + 1);
+//	system("pause");
+//
+//
+//	gotoxy(0, 0);
+//
+//	return 0;
+//
 //}

@@ -3,31 +3,31 @@
 #include <string>
 #include <conio.h>
 #pragma comment(lib, "Winmm.lib") // for PlaySound
-
 //#include "mygraphics.h"
 //#include "yourgraphics.h"
-#include <vector>
 #include "youregraphics.h"
-#include "resource.h"
 
 using namespace std;
 
+bool testing = true;
+
 float dpiRatio = 1;
 
-const int BreakMultiplerMinTime = 1;
 float BALL_FORCE = 6;
-const float fireballForceInc = BALL_FORCE * 0.10;
-const int PLAYER_SPEED = 60;
-const int PLAYER_MOVE_STEP = 20;
-const int POWERUP_DURATION = 10;
+float FireBallForceInc = BALL_FORCE * 0.05;
 
-int gameWidth = 1080, gameHeight = 600;
-int gameX = 0, gameY = 0;
+int gameWidth = 0, gameHeight = 0;
 int consoleRows = 0, consoleCols = 0;
 
-const int TopRowHeight = 80;
+const int MIN_BREAK_BONUS_TIME = 1;
 
-const int BricksRowCount = 6, BricksColCount = 24;
+const int PLAYER_SPEED = 60;
+const int PLAYER_MOVE_STEP = 20;
+
+const int POWERUP_DURATION = 10;
+
+const int TOP_ROW_HEIGHT = 80;
+const int BRICKS_ROW_COUNT = 6, BRICKS_COL_COUNT = 24;
 
 #pragma region Structures
 
@@ -87,8 +87,6 @@ struct Ball
 	float force_y = 0;
 
 	bool fireball = false;
-
-	Color color = COLORS.Back;
 } ball;
 
 struct Projectile
@@ -120,7 +118,7 @@ struct PowerUp
 	const int width = 20;
 	const int height = 20;
 
-	const int force_y = 4;
+	const int force_y = 3;
 
 	int type;
 	bool active = false;
@@ -136,13 +134,13 @@ struct
 	int score = 0;
 
 	bool started = false;
-	bool Over = false;
+	bool over = false;
 	bool paused = false;
 
 	bool focusOut = false;
 
 	bool showStats = false;
-	int BricksLeft = BricksColCount * BricksRowCount;
+	int BricksLeft = BRICKS_COL_COUNT * BRICKS_ROW_COUNT;
 
 } GameManager;
 
@@ -155,39 +153,40 @@ struct Brick
 	int height = 50;
 
 	int health = 3;
-} bricks[BricksRowCount][BricksColCount];
+} bricks[BRICKS_ROW_COUNT][BRICKS_COL_COUNT];
 
 #pragma endregion
 
 #pragma region Prototypes
-
 void Clear(Color);
 void UpdateFontSize(int);
 void DrawLives();
 void DrawPlayer(bool);
 void PrintCenter(int row, string start, string str, string end);
+bool onChance(int);
+int GetBricksLeft();
 #pragma endregion
 
 #pragma region Library Extensions
 
 void drawRectangle(int x1, int y1, int x2, int y2, Color stroke, Color fill)
 {
-	drawRectangle(gameX + x1, y1, gameX + x2, y2, stroke.R, stroke.G, stroke.B, fill.R, fill.G, fill.B);
+	drawRectangle( x1, y1,  x2, y2, stroke.R, stroke.G, stroke.B, fill.R, fill.G, fill.B);
 }
 
 void drawRectangle(int x1, int y1, int x2, int y2, Color color)
 {
-	drawRectangle(gameX + x1, y1, gameX + x2, y2, color, color);
+	drawRectangle( x1, y1,  x2, y2, color, color);
 }
 
 void drawEllipse(int x1, int y1, int x2, int y2, Color stroke, Color fill)
 {
-	drawEllipse(gameX + x1, y1, gameX + x2, y2, stroke.R, stroke.G, stroke.B, fill.R, fill.G, fill.B);
+	drawEllipse( x1, y1,  x2, y2, stroke.R, stroke.G, stroke.B, fill.R, fill.G, fill.B);
 }
 
 void drawEllipse(int x1, int y1, int x2, int y2, Color color)
 {
-	drawEllipse(gameX + x1, y1, gameX + x2, y2, color, color);
+	drawEllipse(x1, y1,  x2, y2, color, color);
 }
 
 bool onKey(char key, char c)
@@ -201,39 +200,23 @@ bool onKey(char key, char c)
 }
 #pragma endregion
 
-bool onChance(int chance)
-{
-	int r = rand() % 100;
-
-	if (r < chance) return true;
-
-	return false;
-}
-
-int GetBricksLeft()
-{
-	int count = 0;
-	for (int r = 0; r < BricksRowCount; r++)
-	{
-		for (int c = 0; c < BricksColCount; c++)
-		{
-			if (bricks[r][c].health > 0) count++;
-		}
-	}
-
-	return count;
-}
-
 #pragma region HighScores
 
 int HighScores[5];
 
 bool AddScore(int score)
 {
+	// let say scores = 8, 6, 4, 2, 1
+	// now if the new score is 7
+	// we first find the index 'i' of the score less then 7
+	// then we start swapping elements from the end of the array to that index i
+	// so after the below logic the array becomes 8, 1, 6, 4, 2
+	// now we replace 1 at i with the new score
 	for (int i = 0; i < 5; i++)
 	{
 		if (score > HighScores[i])
 		{
+			// swap from the end to i
 			for (int j = 4; j > i; j--)
 			{
 				int temp = HighScores[j];
@@ -291,9 +274,9 @@ void HandleBrickCollission(Ball& ball)
 
 	int minProjectileDistanceX = projectile.radius + bricks[0][0].width / 2;
 
-	for (int r = 0; r < BricksRowCount; r++)
+	for (int r = 0; r < BRICKS_ROW_COUNT; r++)
 	{
-		for (int c = 0; c < BricksColCount; c++)
+		for (int c = 0; c < BRICKS_COL_COUNT; c++)
 		{
 			// dont even check for collision if bricks health is zero
 			if (bricks[r][c].health == 0) continue;
@@ -327,9 +310,7 @@ void HandleBrickCollission(Ball& ball)
 			if (
 				projectile.active &&
 				projectileDistanceX <= minProjectileDistanceX &&
-				//projectile.x + projectile.diameter > brick.x && projectile.x + projectile.radius < brick.x + brick.width &&
 				projectile.y < brick.y + brick.height
-				//&& projectile.y + projectile.radius > brick.y
 				)
 			{
 				brick.health = 0;
@@ -339,6 +320,8 @@ void HandleBrickCollission(Ball& ball)
 			// only redraw if something collided
 			if (collisioned)
 			{
+				PlaySound(TEXT("hit.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
+
 				Color brickColor = COLORS.Back;
 
 				switch (brick.health)
@@ -349,7 +332,7 @@ void HandleBrickCollission(Ball& ball)
 				default: brickColor = COLORS.Back; break;
 				}
 
-				Color darkerBrickColor = brickColor;
+				Color darkerBrickColor = brickColor; // for border
 
 				if (brick.health != 0)
 				{
@@ -363,7 +346,7 @@ void HandleBrickCollission(Ball& ball)
 				if (brick.health <= 0)
 				{
 					// Reward a bonus if player broke the brick in 1s of breaking the last one
-					if (time(NULL) - LastTimeBrickBroke <= BreakMultiplerMinTime)
+					if (time(NULL) - LastTimeBrickBroke <= MIN_BREAK_BONUS_TIME)
 						GameManager.score += 10;
 					else
 						GameManager.score += 5;
@@ -378,7 +361,7 @@ void HandleBrickCollission(Ball& ball)
 						powerUp.x = brick.x + brick.width / 2;
 
 						// dropping from last bricks height to avoid reprinting bricks
-						powerUp.y = bricks[BricksRowCount - 1][BricksColCount - 1].y + bricks[BricksRowCount - 1][BricksColCount - 1].height;
+						powerUp.y = bricks[BRICKS_ROW_COUNT - 1][BRICKS_COL_COUNT - 1].y + bricks[BRICKS_ROW_COUNT - 1][BRICKS_COL_COUNT - 1].height;
 						
 						int randomChance = rand() % 100;
 						
@@ -399,7 +382,7 @@ void HandleBrickCollission(Ball& ball)
 				}
 
 				// Stop the game if all bricks are broken
-				if (GameManager.BricksLeft <= 0) GameManager.Over = true;
+				if (GameManager.BricksLeft <= 0) GameManager.over = true;
 			}
 
 
@@ -412,38 +395,25 @@ void HandleBrickCollission(Ball& ball)
 bool HandlePaddleCollission(Ball& ball)
 {
 	// detecting collision for the next ball position
-	int nextBallx = ball.x + ball.force_x;
+	int nextBallX = ball.x + ball.force_x;
 	int nextBallY = ball.y + ball.force_y;
 
-	// TODO: unpleg
-	if (
-		nextBallx < player.x + player.width && nextBallx + ball.width > player.x &&
-		nextBallY < player.y + player.height && ball.height + nextBallY > player.y
-		)
+	int minDistanceX = ball.width / 2 + player.width / 2;
+	int minDistanceY = ball.height / 2 + player.height / 2;
+
+	float distanceX = abs((player.x + player.width / 2) - (nextBallX + ball.width / 2));
+	float distanceY = abs((player.y + player.height / 2) - (nextBallY + ball.height / 2));
+
+	if (distanceX <= minDistanceX && distanceY <= minDistanceY)
 	{
-		// Calculate the distance between centers
-		int centerDistanceX = (player.x + player.width / 2) - (ball.x + ball.width / 2);
-		int centerDistanceY = (player.y + player.height / 2) - (ball.y + ball.height / 2);
+		int ballCenter = nextBallX + ball.width / 2;
 
-		// Calculate the minimum distance to separate along X and Y
-		int minXDist = player.width / 2 + ball.width / 2;
-		int minYDist = player.height / 2 + ball.height / 2;
+		float ballDistance = player.x + player.width - ballCenter;
 
-		// Calculate the depth of collision for both the X and Y axis
-		int depthX = centerDistanceX > 0 ? minXDist - centerDistanceX : -minXDist - centerDistanceX;
-		int depthY = centerDistanceY > 0 ? minYDist - centerDistanceY : -minYDist - centerDistanceY;
+		float ratio = ballDistance / player.width;
 
-		if (depthX != 0 && depthY != 0)
-		{
-			int ballCenter = nextBallx + ball.width / 2;
-
-			float ballDistance = player.x + player.width - ballCenter;
-
-			float ratio = ballDistance / player.width;
-
-			ball.force_x = BALL_FORCE * cos((ratio * (180 - 30) + 15) * 3.14 / 180);
-			ball.force_y = -BALL_FORCE * sin((ratio * (180 - 30) + 15) * 3.14 / 180);
-		}
+		ball.force_x = BALL_FORCE * cos((ratio * (180 - 30) + 15) * 3.14 / 180);
+		ball.force_y = -BALL_FORCE * sin((ratio * (180 - 30) + 15) * 3.14 / 180);
 
 		return true;
 	}
@@ -473,11 +443,17 @@ void setFireball(bool on)
 
 bool HandlePaddleCollission(PowerUp& powerUp)
 {
-	// TODO: fix pleg
-	if (
-		powerUp.x < player.x + player.width && powerUp.x + powerUp.width > player.x &&
-		powerUp.y + powerUp.force_y < player.y + player.height && powerUp.height + powerUp.y + powerUp.force_y > player.y
-		)
+	// detecting collision for the next ball position
+	int nextProjectX = powerUp.x;
+	int nextProjectY = powerUp.y + powerUp.force_y;
+
+	int minDistanceX = powerUp.width / 2 + player.width / 2;
+	int minDistanceY = powerUp.height / 2 + player.height / 2;
+
+	float distanceX = abs((player.x + player.width / 2) - (nextProjectX + powerUp.width / 2));
+	float distanceY = abs((player.y + player.height / 2) - (nextProjectY + powerUp.height / 2));
+
+	if (distanceX <= minDistanceX && distanceY <= minDistanceY)
 	{
 		if (powerUp.type == PowerUpTypes.shorten)
 		{
@@ -615,17 +591,17 @@ void DrawBall()
 		ball.force_x *= -1;
 	}
 
-	if (ball.y + ball.force_y < TopRowHeight)
+	if (ball.y + ball.force_y < TOP_ROW_HEIGHT)
 	{
-		ball.y = TopRowHeight + 1;
+		ball.y = TOP_ROW_HEIGHT + 1;
 		ball.force_y *= -1;
 	}
 
 	// adding force
-	ball.x += ball.force_x + (ball.fireball ? (fireballForceInc * (ball.force_x + 1 / abs(ball.force_x + 1))) : 0);
-	ball.y += ball.force_y + (ball.fireball ? (fireballForceInc * (ball.force_y + 1 / abs(ball.force_y + 1))) : 0);
+	ball.x += ball.force_x + (ball.fireball ? (FireBallForceInc * (ball.force_x + 1 / abs(ball.force_x + 1))) : 0);
+	ball.y += ball.force_y + (ball.fireball ? (FireBallForceInc * (ball.force_y + 1 / abs(ball.force_y + 1))) : 0);
 
-	drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, ball.fireball ? COLORS.Orange : ball.color);
+	drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, ball.fireball ? COLORS.Orange : COLORS.Front);
 }
 
 void DrawPowerUp()
@@ -672,7 +648,7 @@ void DrawProjectile()
 
 		projectile.y += projectile.force_y;
 
-		if (projectile.y <= TopRowHeight)
+		if (projectile.y <= TOP_ROW_HEIGHT)
 		{
 			projectile.active = false;
 			return;
@@ -683,7 +659,6 @@ void DrawProjectile()
 		drawEllipse(projectile.x + projectile.radius / 2 - r3 / 2, projectile.y + projectile.radius, projectile.x + projectile.radius / 2 - r3 / 2 + r3, projectile.y + projectile.radius + r3, COLORS.Orange);
 		drawEllipse(projectile.x + projectile.radius / 2 - r2 / 2, projectile.y + projectile.radius / 2, projectile.x + projectile.radius / 2 + r2 / 2, projectile.y + projectile.radius / 2 + r2, 230, 126, 34, 230, 126, 34);
 		drawEllipse(projectile.x, projectile.y, projectile.x + projectile.radius, projectile.y + projectile.radius, COLORS.Orange);
-
 	}
 }
 
@@ -720,9 +695,9 @@ void DrawLives()
 	for (int i = 1; i <= 3; i++)
 	{
 		if (i <= player.lives)
-			DrawHeart(gameWidth - (50 * i) - 25 - (i * 20), 30, TopRowHeight - 20, COLORS.Red);
+			DrawHeart(gameWidth - (50 * i) - 25 - (i * 20), 30, TOP_ROW_HEIGHT - 20, COLORS.Red);
 		else
-			DrawHeart(gameWidth - (50 * i) - 25 - (i * 20), 30, TopRowHeight - 20, Color{ 10,10,10 });
+			DrawHeart(gameWidth - (50 * i) - 25 - (i * 20), 30, TOP_ROW_HEIGHT - 20, Color{ 10,10,10 });
 	}
 }
 
@@ -739,20 +714,16 @@ void DrawScore(bool force = false)
 
 		lastScore = GameManager.score;
 
-		//cout << "\033[35;47m";
-
 		gotoxy(consoleCols / 2 - strlen("SAVE   PAUSE") / 2, 0);
 		cout << "\033[7mS\033[27mAVE   \033[7mP\033[27mAUSE\033[27m";
-		
-		//delay(100);
 	}
 }
 
 void DrawBricks()
 {
-	for (int r = 0; r < BricksRowCount; r++)
+	for (int r = 0; r < BRICKS_ROW_COUNT; r++)
 	{
-		for (int c = 0; c < BricksColCount; c++)
+		for (int c = 0; c < BRICKS_COL_COUNT; c++)
 		{
 			Brick& b = bricks[r][c];
 
@@ -788,7 +759,7 @@ void RedrawGame()
 {
 	Clear();
 
-	drawRectangle(0, 0, gameWidth, TopRowHeight, COLORS.Front);
+	drawRectangle(0, 0, gameWidth, TOP_ROW_HEIGHT, COLORS.Front);
 
 	DrawLives();
 
@@ -801,10 +772,11 @@ void RedrawGame()
 
 	DrawBricks();
 }
+
 #pragma endregion
 
 #pragma region Saving Game State
-
+bool saveFileExists = false;
 bool DoesSaveFileExist()
 {
 	ifstream saveFile;
@@ -851,11 +823,11 @@ void SaveGameState()
 	saveFile << GameManager.showStats << endl;
 	saveFile << GameManager.started << endl;
 	saveFile << GameManager.BricksLeft << endl;
-	saveFile << GameManager.Over << endl;
+	saveFile << GameManager.over << endl;
 
-	for (size_t r = 0; r < BricksRowCount; r++)
+	for (size_t r = 0; r < BRICKS_ROW_COUNT; r++)
 	{
-		for (size_t c = 0; c < BricksColCount; c++)
+		for (size_t c = 0; c < BRICKS_COL_COUNT; c++)
 		{
 			Brick b = bricks[r][c];
 
@@ -908,11 +880,11 @@ void LoadGameState()
 	saveFile >> GameManager.showStats;
 	saveFile >> GameManager.started;
 	saveFile >> GameManager.BricksLeft;
-	saveFile >> GameManager.Over;
+	saveFile >> GameManager.over;
 
-	for (size_t r = 0; r < BricksRowCount; r++)
+	for (size_t r = 0; r < BRICKS_ROW_COUNT; r++)
 	{
-		for (size_t c = 0; c < BricksColCount; c++)
+		for (size_t c = 0; c < BRICKS_COL_COUNT; c++)
 		{
 			Brick& b = bricks[r][c];
 
@@ -991,8 +963,6 @@ void setInitPos()
 	ball.force_x = 0;
 	ball.force_y = 0;
 
-	ball.color = COLORS.Front;
-
 	DrawPlayer(true);
 
 	GameManager.started = false;
@@ -1001,12 +971,9 @@ void setInitPos()
 #pragma endregion
 
 #pragma region Main Menu
-
 const int menuItemsLength = 3;
 string menuItems[menuItemsLength] = { "CONTINUE", "NEW GAME", "EXIT    " };
 int currentMenuItem = 0;
-
-bool saveFileExists = false;
 
 void printMenuItems()
 {
@@ -1117,46 +1084,20 @@ void printHighScores()
 
 #pragma region Transitions
 
-const float TRANSITION_SPEED = 0.5;
+const float TRANSITION_SPEED = 1;
 
-void TransitionCircleExpand(Color Back, Color Front)
-{
-	for (int i = 0; i < gameWidth / 1.5; i += 4)
-	{
-		drawEllipse(gameWidth / 2 - i, gameHeight / 2 - i, gameWidth / 2 + i, gameHeight / 2 + i, Front);
-	}
-
-	delay(200);
-
-	for (int i = 0; i < gameWidth / 1.5; i += 4)
-	{
-		drawEllipse(gameWidth / 2 - i, gameHeight / 2 - i, gameWidth / 2 + i, gameHeight / 2 + i, Back);
-
-	}
-}
-
-void TransitionRight(Color Back, Color Front)
-{
-	for (int i = 0; i < gameWidth + gameWidth / 2; i++)
-	{
-		drawLine(0 + i, 0, 0 + i, gameHeight, Front.R, Front.G, Front.B);
-
-		drawLine(0 + i - gameWidth / 2, 0, 0 + i - gameWidth / 2, gameHeight, Back.R, Back.G, Back.B);
-	}
-}
-
-void TransitionRightR(Color Back, Color Front)
+void TransitionRight(Color first, Color second)
 {
 	for (float i = 0; i < gameWidth + gameWidth / 2; i += TRANSITION_SPEED)
 	{
-		drawLine(0 + i, 0, 0 + i, gameHeight, Front.R, Front.G, Front.B);
+		drawLine(0 + i, 0, 0 + i, gameHeight, first.R, first.G, first.B);
 	}
 
 	delay(200);
 
 	for (float i = 0; i < gameWidth + gameWidth / 2; i += TRANSITION_SPEED)
 	{
-		drawLine(0 + i, 0, 0 + i, gameHeight, Back.R, Back.G, Back.B);
+		drawLine(0 + i, 0, 0 + i, gameHeight, second.R, second.G, second.B);
 	}
 
 	delay(200);
@@ -1164,6 +1105,28 @@ void TransitionRightR(Color Back, Color Front)
 	for (float i = 0; i < gameWidth + gameWidth / 2; i += TRANSITION_SPEED)
 	{
 		drawLine(0 + i, 0, 0 + i, gameHeight, COLORS.Back.R, COLORS.Back.G, COLORS.Back.B);
+	}
+}
+
+void TransitionLeft(Color first, Color second)
+{
+	for (float i = gameWidth; i > 0; i -= TRANSITION_SPEED)
+	{
+		drawLine(i, 0, i, gameHeight, first.R, first.G, first.B);
+	}
+
+	delay(100);
+
+	for (float i = gameWidth; i > 0; i -= TRANSITION_SPEED)
+	{
+		drawLine(i, 0, i, gameHeight, second.R, second.G, second.B);
+	}
+
+	delay(100);
+
+	for (float i = gameWidth; i > 0; i -= TRANSITION_SPEED)
+	{
+		drawLine(i, 0, i, gameHeight, COLORS.Back.R, COLORS.Back.G, COLORS.Back.B);
 	}
 }
 
@@ -1178,14 +1141,14 @@ void TransitionUp(Color Back, Color Front)
 
 void TransitionDown(Color First, Color Second)
 {
-	for (float i = 0; i < gameHeight + gameHeight / 2; i += 0.5)
+	for (float i = 0; i < gameHeight + gameHeight / 2; i += TRANSITION_SPEED)
 	{
 		drawLine(0, i, gameWidth, i, First.R, First.G, First.B);
 	}
 
 	delay(200);
 
-	for (float i = 0; i < gameHeight + gameHeight / 4; i += 0.5)
+	for (float i = 0; i < gameHeight + gameHeight / 4; i += TRANSITION_SPEED)
 	{
 		drawLine(0, i, gameWidth, i, Second.R, Second.G, Second.B);
 	}
@@ -1198,6 +1161,29 @@ void TransitionDown(Color First, Color Second)
 	}*/
 }
 #pragma endregion
+
+bool onChance(int chance)
+{
+	int r = rand() % 100;
+
+	if (r < chance) return true;
+
+	return false;
+}
+
+int GetBricksLeft()
+{
+	int count = 0;
+	for (int r = 0; r < BRICKS_ROW_COUNT; r++)
+	{
+		for (int c = 0; c < BRICKS_COL_COUNT; c++)
+		{
+			if (bricks[r][c].health > 0) count++;
+		}
+	}
+
+	return count;
+}
 
 // Changes the font size of the console to get specified no of rows
 void UpdateFontSize(int rowsCount)
@@ -1249,53 +1235,8 @@ void UpdateFontSizePx(int fHeight)
 
 int main()
 {
-	
-	PlaySound(MAKEINTRESOURCE(IDR_WAVE1), NULL, SND_RESOURCE | SND_ASYNC | SND_LOOP);
-
-	//TODO: remove all paths to D and E
-	//PlaySound(TEXT("D:/bgsoundc.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
-	// Testing Code, will be removed
-	/*HWND tconsole = GetConsoleWindow();
-	HANDLE tconsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetProcessDPIAware();
-	ShowWindow(tconsole, SW_SHOWMAXIMIZED);
-	setUpColors();
-	delay(500);
-
-	getWindowDimensions(gameWidth, gameHeight);
-
-	UpdateFontSize(8);
-
-	getWindowDimensions(gameWidth, gameHeight);
-
-	getConsoleWindowDimensions(consoleCols, consoleRows );
-
-	gotoxy(consoleCols, consoleRows);
-	cout << "a";
-
-	delay(1000);
-
-	cls();
-
-	for (size_t i = 0; i <= consoleCols; i++)
-	{
-		gotoxy(i, 0);
-		if (i == consoleCols)
-			cout << "x";
-		else cout << i + 1;
-		delay(100);
-	}
-
-	for (size_t i = 0; i <= consoleRows; i++)
-	{
-		gotoxy(0, i);
-		if (i == consoleRows)
-			cout << "y";
-		else cout << i + 1;
-		delay(100);
-	}
-
-	while (true);*/
+	cout << "Loading...";
+	PlaySound(TEXT("bgsound.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 
 	HWND console = GetConsoleWindow();
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1310,20 +1251,6 @@ int main()
 
 	SetProcessDPIAware();
 	ShowWindow(console, SW_SHOWMAXIMIZED);
-	//MoveWindow(console, 0, 0, 1000, 800, FALSE);
-	//SetConsoleMode(consoleHandle, 
-	//	ENABLE_ECHO_INPUT |
-	//	ENABLE_INSERT_MODE |
-	//	ENABLE_LINE_INPUT |
-	//	//ENABLE_MOUSE_INPUT |
-	//	ENABLE_PROCESSED_INPUT |
-	//	//ENABLE_QUICK_EDIT_MODE |
-	//	ENABLE_PROCESSED_OUTPUT |
-	//	//ENABLE_WRAP_AT_EOL_OUTPUT |
-	//	ENABLE_VIRTUAL_TERMINAL_PROCESSING |
-	//	DISABLE_NEWLINE_AUTO_RETURN |
-	//	ENABLE_LVB_GRID_WORLDWIDE
-	//);
 
 	delay(400);
 
@@ -1333,11 +1260,18 @@ int main()
 
 	getWindowDimensions(gameWidth, gameHeight);
 	getConsoleWindowDimensions(consoleCols, consoleRows);
-	BALL_FORCE = gameHeight / 140;
+
+	// Setting ball speed based on screen height
+	BALL_FORCE = gameHeight / 120;
+	FireBallForceInc = BALL_FORCE * 0.10;
+
 	showConsoleCursor(false);
 	cls();
 
 	setUpColors();
+
+
+#pragma region Main Menu
 
 	UpdateFontSize(8);
 
@@ -1362,8 +1296,6 @@ int main()
 
 	SetConsoleScreenBufferInfoEx(consoleHandle, &info);
 
-#pragma region Main Menu
-
 	Clear();
 
 	printHighScores();
@@ -1371,24 +1303,12 @@ int main()
 	printMenuItems();
 
 	// since the loop runs too fast
-	// we handle input when it is detected multiple times
+	// we only handle input when it is detected multiple times
 	int holder = 0;
 
 	while (true) // Menu Loop
 	{
 		char c = getKey();
-
-		// TODO: remove test method
-		if (onKey('r', c))
-		{
-			Clear();
-			getWindowDimensions(gameWidth, gameHeight);
-			UpdateFontSize(8);
-
-			printHighScores();
-
-			printMenuItems();
-		}
 
 		if (onKey('s', c) || onKey(KEY_DOWN, c))
 		{
@@ -1402,7 +1322,6 @@ int main()
 
 				holder = 0;
 			}
-
 		}
 		else if (onKey('w', c) || onKey(KEY_UP, c))
 		{
@@ -1419,7 +1338,11 @@ int main()
 		{
 			if (currentMenuItem == 0)
 			{
-				if (saveFileExists) break;
+				if (saveFileExists)
+				{
+					TransitionLeft(COLORS.Purple, COLORS.Blue);
+					break;
+				}
 				else
 				{
 					int a = consoleCols / 4 - strlen("BREAKOUT") / 2 - 1;
@@ -1429,10 +1352,7 @@ int main()
 			}
 			else if (currentMenuItem == 1)
 			{
-				//TransitionCircleExpand(COLORS.White, COLORS.Black);
-				//TransitionUp(COLORS.White, COLORS.Black);
-				//TransitionRight(COLORS.Purple, COLORS.Green);
-				TransitionRightR(COLORS.Purple, COLORS.Green);
+				TransitionRight(COLORS.Purple, COLORS.Green);
 				break;
 			}
 			else if (currentMenuItem == 2) exit(0);
@@ -1444,12 +1364,14 @@ int main()
 
 #pragma endregion
 
+	PlaySound(NULL, 0, 0); // stop the bg sound
 
 	system("color 07");
 	Clear();
-	UpdateFontSizePx(TopRowHeight - 2);
+	UpdateFontSizePx(TOP_ROW_HEIGHT - 2);
+
 	drawRectangle(0, 0, gameWidth, gameHeight, COLORS.Back);
-	drawRectangle(0, 0, gameWidth, TopRowHeight, COLORS.Front);
+	drawRectangle(0, 0, gameWidth, TOP_ROW_HEIGHT, COLORS.Front);
 
 	if (currentMenuItem == 0)
 	{
@@ -1461,20 +1383,14 @@ int main()
 		DrawLives();
 
 		// Bricks Size Set up
-		int brickWidth = gameWidth / BricksColCount;
-		int brickHeight = (gameHeight - TopRowHeight) / 2 / BricksRowCount;
-		float extraSpace = (((float)gameWidth / (float)BricksColCount) - brickWidth) * BricksColCount;
-
-
-
-		/*drawRectangle(0, 0, extraSpace / 2, gameHeight, COLORS.Black);
-		drawRectangle(gameWidth - extraSpace / 2, 0, gameWidth, gameHeight, COLORS.Black);
-		drawRectangle(0, gameHeight - 10, gameWidth, gameHeight, COLORS.Black);*/
+		int brickWidth = gameWidth / BRICKS_COL_COUNT;
+		int brickHeight = (gameHeight - TOP_ROW_HEIGHT) / 2 / BRICKS_ROW_COUNT;
+		float extraSpace = (((float)gameWidth / (float)BRICKS_COL_COUNT) - brickWidth) * BRICKS_COL_COUNT;
 
 		// Setting up intial bricks coordinates
-		for (int r = 0; r < BricksRowCount; r++)
+		for (int r = 0; r < BRICKS_ROW_COUNT; r++)
 		{
-			for (int c = 0; c < BricksColCount; c++)
+			for (int c = 0; c < BRICKS_COL_COUNT; c++)
 			{
 				Brick brick;
 
@@ -1482,15 +1398,18 @@ int main()
 				brick.height = brickHeight;
 
 				brick.x = c * brick.width + extraSpace / 2;
-				brick.y = r * brick.height + TopRowHeight;
+				brick.y = r * brick.height + TOP_ROW_HEIGHT;
 
+
+				// making sure first col is fixed with left side of screen
 				if (c == 0)
 				{
 					brick.width += extraSpace;
 					brick.x = 0;
 				}
 
-				if (c == BricksColCount - 1)
+				// making last col fixed with right side of screen
+				if (c == BRICKS_COL_COUNT - 1)
 				{
 					brick.width += extraSpace;
 				}
@@ -1505,18 +1424,18 @@ int main()
 	}
 
 
+
 	// Stats set up
 	time_t startTime = time(NULL);
 	int framecount = 0;
 	time_t t = time(NULL);
 
-	holder = 0;
-
 	// Game Loop
-	while (!GameManager.Over)
+	while (!GameManager.over)
 	{
 		char c = getKey();
 
+		// pause the game if window focus changes
 		if (c == WINDOW_FOCUS_CHANGED)
 		{
 			GameManager.paused = true;
@@ -1560,6 +1479,7 @@ int main()
 				cout << "PRESS SPACE TO START";
 			}
 			
+			// dec lives if ball leaves the screen
 			if (ball.y > gameHeight)
 			{
 				player.lives--;
@@ -1567,60 +1487,53 @@ int main()
 				DrawLives();
 				setInitPos();
 
-				if (player.lives <= 0) GameManager.Over = true;
+				if (player.lives <= 0) GameManager.over = true;
 			}
 
 
-			if (c == ' ' && !GameManager.started)
+			if (onKey(' ', c) && !GameManager.started)
 			{
 				ball.force_x = BALL_FORCE * cos((rand() % (180 - 40) + 20) * 3.14 / 180);
 				ball.force_y = -BALL_FORCE * sin((rand() % (180 - 40) + 20) * 3.14 / 180);
 
 				gotoxy(consoleCols / 2 - strlen("PRESS SPACE TO START") / 2, 0);
-				cout <<	"                      ";
+				cout << repeatStr(" ", strlen("PRESS SPACE TO START") + 2);
 				DrawScore(true);
 				GameManager.started = true;
 			}
-
 			else if (onKey('d', c) || onKey(KEY_RIGHT, c)) player.force_x = PLAYER_SPEED;
 			else if (onKey('a', c) || onKey(KEY_LEFT, c)) player.force_x = -PLAYER_SPEED;
 
-			// TODO: For testing, will be removed
-			else if (c == 'j') {
-				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
-
-				ball.force_x = -5;
-			}
-			else if (c == 'l') {
-				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
-				ball.force_x = 5;
-			}
-			else if (c == 'i') {
-				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
-				ball.force_y = -5;
-			}
-			else if (c == 'k') {
-				//drawEllipse(ball.x, ball.y, ball.x + ball.width, ball.y + ball.height, COLORS.Back);
-				ball.force_y = 5;
+			if (testing) // ball movement
+			{
+				if (c == 'j')
+					ball.force_x = -5;
+				else if (c == 'l')
+					ball.force_x = 5;
+				else if (c == 'i')
+					ball.force_y = -5;
+				else if (c == 'k')
+					ball.force_y = 5;
 			}
 		}
 
 		if (onKey('s', c)) SaveGameState();
-
-		// TODO: For testing, will be removed
-		//else if (c == '\'') LoadGameState();
-		else if (c == 'f') setFireball(true);
-		else if (c == 'g') setFireball(false);
-		else if (c == 'y') RedrawGame();
-		else if (c == 't')
+		
+		if (testing)
 		{
-			projectile.x = player.x + player.width / 2;
-			projectile.y = player.y - projectile.diameter;
+			if (c == 'f') setFireball(true);
+			else if (c == 'g') setFireball(false);
+			else if (c == 'y') RedrawGame();
+			else if (c == 't')
+			{
+				projectile.x = player.x + player.width / 2;
+				projectile.y = player.y - projectile.diameter;
 
-			projectile.active = true;
+				projectile.active = true;
+			}
+			else if (onKey('o', c)) GameManager.showStats = true;
+			else if (c == 'c') cls();
 		}
-		else if (onKey('o', c)) GameManager.showStats = true;
-		else if (c == 'c') cls();
 
 		delay(1000 / 120);
 
@@ -1630,13 +1543,13 @@ int main()
 		{
 			if (GameManager.showStats)
 			{
+				/*gotoxy(0, 0);
+				cout << "TIM: " << time(NULL) - startTime;*/
+
 				gotoxy(0, 0);
-				cout << "TIM: " << time(NULL) - startTime;
+				cout << repeatStr(" ", to_string(GameManager.score ).length() + 3) << "FPS: " << framecount;
 
-				gotoxy(0, 1);
-				cout << "FPS: " << framecount;
-
-				gotoxy(0, 2);
+			/*	gotoxy(0, 2);
 				cout << "FOR: " << ((player.force_x < 0) ? "-" : "+") << abs(player.force_x);
 
 				gotoxy(0, 3);
@@ -1646,7 +1559,7 @@ int main()
 				cout << "BFY: " << ((ball.force_y < 0) ? "-" : "+") << abs(ball.force_y);
 
 				gotoxy(0, 5);
-				cout << "LFT: " << GameManager.BricksLeft;
+				cout << "LFT: " << GameManager.BricksLeft;*/
 
 
 				/*gotoxy(0, 3);
@@ -1663,12 +1576,12 @@ int main()
 #pragma endregion
 	}
 
+	PlaySound(TEXT("bgsound.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+
 	system("color 70");
 	Clear();
 	UpdateFontSize(8);
 	getConsoleWindowDimensions(consoleCols, consoleRows);
-
-
 
 	// Checking wheather player won or lost
 	if (player.lives > 0) // player won
@@ -1679,7 +1592,7 @@ int main()
 
 		system("color 27");
 
-		PrintCenter(2, "\033[7m", " YOU WON!! ", "\033[27m");
+		PrintCenter(3, "\033[7m", " YOU WON!! ", "\033[27m");
 	}
 	else // player lost
 	{
