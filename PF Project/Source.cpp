@@ -13,7 +13,7 @@
 
 using namespace std;
 
-bool testing = true;
+bool testing = false;
 
 float dpiRatio = 1;
 
@@ -1534,6 +1534,8 @@ int main()
 
 		if (onKey('s', c)) SaveGameState();
 		
+		if (onKey('o', c)) GameManager.showStats = true;
+
 		if (testing)
 		{
 			if (c == 'f') setFireball(true);
@@ -1546,7 +1548,6 @@ int main()
 
 				projectile.active = true;
 			}
-			else if (onKey('o', c)) GameManager.showStats = true;
 			else if (c == 'c') cls();
 		}
 
