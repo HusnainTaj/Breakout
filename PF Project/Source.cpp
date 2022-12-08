@@ -535,7 +535,7 @@ void DrawPlayer(bool redraw = false)
 {
 	if (redraw) drawRectangle(0, player.y, gameWidth, player.y + player.height, COLORS.Back);
 
-	if (!redraw && player.force_x == 0) return;
+	if (player.force_x == 0 && ball.y < player.y - 100) return;
 
 	// Removing old paddle
 	if (player.x + player.width > gameWidth)
