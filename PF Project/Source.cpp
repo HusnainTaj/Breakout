@@ -772,6 +772,17 @@ void RedrawGame()
 	lastScore = -1;
 	DrawScore();
 
+	if (GameManager.paused)
+	{
+		gotoxy(consoleCols / 2 - strlen("SAVE   RESUME") / 2, 0);
+		cout << "\033[7mS\033[27mAVE   \033[7mR\033[27mESUME\033[27m";
+	}
+	else 
+	{
+		gotoxy(consoleCols / 2 - strlen("SAVE   PAUSE ") / 2, 0);
+		cout << "\033[7mS\033[27mAVE   \033[7mP\033[27mAUSE \033[27m";
+	}
+
 	DrawBricks();
 }
 
@@ -883,6 +894,8 @@ void LoadGameState()
 	saveFile >> GameManager.started;
 	saveFile >> GameManager.BricksLeft;
 	saveFile >> GameManager.over;
+
+	GameManager.paused = true; // pause the game on load so player has time to get ready
 
 	for (size_t r = 0; r < BRICKS_ROW_COUNT; r++)
 	{
