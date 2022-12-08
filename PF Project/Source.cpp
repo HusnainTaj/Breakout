@@ -1,4 +1,8 @@
-﻿#include <iostream>
+﻿// Programming Fundamentals Project 
+// Breakout Game
+// Husnain Taj (22L-6786) && Afaq Khaliq (22L-6939)
+
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <conio.h>
@@ -474,13 +478,11 @@ bool HandlePaddleCollission(PowerUp& powerUp)
 		}
 		else if (powerUp.type == PowerUpTypes.projectile)
 		{
-			////////////////
 			projectile.x = player.x + player.width / 2;
 			projectile.y = player.y - projectile.diameter;
 
 			projectile.active = true;
 		}
-
 
 		powerUp.dropping = false;
 		powerUp.active = true;
@@ -1262,7 +1264,7 @@ int main()
 	getConsoleWindowDimensions(consoleCols, consoleRows);
 
 	// Setting ball speed based on screen height
-	BALL_FORCE = gameHeight / 120;
+	BALL_FORCE = gameHeight / 150;
 	FireBallForceInc = BALL_FORCE * 0.10;
 
 	showConsoleCursor(false);
