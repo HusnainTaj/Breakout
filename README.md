@@ -3,18 +3,18 @@ BREAKOUT Game
 
 ## Running
 - Create a new Empty C++ Project
-- Add the 'youregraphics.h' library to the Header Files
-- Add 'Source.cpp' to the Source Files
-- Also copy the 'bgsound.wav' and 'hit.wav' files to the project directory for background music and hit sound
+- Add the `youregraphics.h` library to the Header Files
+- Add `Source.cpp` to the Source Files
+- Also copy the `bgsound.wav` and `hit.wav` files to the project directory for background music and hit sound
 - Press F5 to build and run the game
 
 ## Controls
 - Use W/S or Up/Down Arrow keys to traverse the menu
 - Use A/D or Left/Right Arrow keys to move the Paddle
 - Press Spacebar to Start
-- Press 'p' to Pause
-- Press 'r' to Resume
-- Press 's' to Save
+- Press `P` to Pause
+- Press `R` to Resume
+- Press `S` to Save
 
 
 
