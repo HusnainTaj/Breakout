@@ -1,7 +1,8 @@
 # Programming Fundamentals Project 
-BREAKOUT Game 
+This BREAKOUT game clone was made in c++ console for the Programming Fundamentals semester project.
 
-## Running
+## How to run
+You can just clone this repository or follow the steps below to add in your own project.
 - Create a new Empty C++ Project
 - Add the `youregraphics.h` library to the Header Files
 - Add `Source.cpp` to the Source Files
@@ -16,7 +17,7 @@ BREAKOUT Game
 - Press `R` to Resume
 - Press `S` to Save
 
-
+# Game Mechanics
 
 ## Paddle
 Player has 3 lives shown on the top right. If player misses the ball and it touches the bottom of the screen, player will lose a life.
@@ -46,3 +47,11 @@ Every Brick broken rewards 5 points, unless you break multiple bricks within 1 s
 
 5 Highest scores are saved on the disk. Which are displayed in the main menu.
 
+## Screenshots
+![Main Menu](https://github.com/HusnainTaj/PFProject/blob/master/imgs/1.png?raw=true)
+
+![Game](https://github.com/HusnainTaj/PFProject/blob/master/imgs/2.png?raw=true)
+
+![Lose Screen](https://github.com/HusnainTaj/PFProject/blob/master/imgs/3.png?raw=true)
+
+![Win Screen](https://github.com/HusnainTaj/PFProject/blob/master/imgs/4.png?raw=true)
