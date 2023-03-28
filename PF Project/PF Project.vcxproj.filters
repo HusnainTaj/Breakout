@@ -32,12 +32,6 @@
     <ClCompile Include="afaq.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="afaq heart.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="temp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

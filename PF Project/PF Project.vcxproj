@@ -132,9 +132,7 @@
     <ClInclude Include="yourgraphics.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="afaq heart.cpp" />
     <ClCompile Include="afaq.cpp" />
-    <ClCompile Include="image.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="temp.cpp" />
   </ItemGroup>
