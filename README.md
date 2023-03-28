@@ -46,7 +46,7 @@ Every Brick broken rewards 5 points, unless you break multiple bricks within 1 s
 
 5 Highest scores are saved on the disk. Which are displayed in the main menu.
 
-## Scoring
+## Screenshots
 ![Main Menu](https://github.com/HusnainTaj/PFProject/blob/master/imgs/1.png?raw=true)
 
 ![Game](https://github.com/HusnainTaj/PFProject/blob/master/imgs/2.png?raw=true)
