@@ -45,7 +45,7 @@ void drawLine(int x1, int y1, int x2, int y2, int R, int G, int B) //use three 3
 }
 
 void drawRectangle(int x1, int y1, int x2, int y2, int R, int G, int B) {
-	drawRectangle(x1, y1, x2, y2, R, G, B, 0, 0, 0);
+	drawRectangle(x1, y1, x2, y2, R, G, B, R, G, B);
 }
 
 void drawRectangle(int x1, int y1, int x2, int y2, int R, int G, int B, int FR, int FG, int FB)

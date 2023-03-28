@@ -13,7 +13,23 @@
 
 using namespace std;
 
-bool testing = false;
+// References
+// ------------------------------------------------------------------------------
+// Playing Sound
+// https://learn.microsoft.com/en-us/previous-versions/dd743680(v=vs.85)
+// ------------------------------------------------------------------------------
+// For colored output text using cout 
+// https://en.wikipedia.org/wiki/ANSI_escape_code
+// ------------------------------------------------------------------------------
+// Changing color scheme for the whole console
+// system("color 70"); 
+// https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/color
+// ------------------------------------------------------------------------------
+
+
+// Settings
+
+bool testing = true;
 
 float dpiRatio = 1;
 
@@ -689,7 +705,6 @@ void DrawHeart(int x1, int y1, int scale, Color color) {
 		drawLine((x1 + scale) - scale / 4.0, (y1 - scale / 4.0) + i, x1 + (scale / 2), y1, color.R, color.G, color.B);
 
 	}
-
 }
 
 void DrawLives()
@@ -1074,7 +1089,7 @@ void printHighScores()
 		PrintCenterHScores(startRow + 3, "", "SCORES", "", 4);
 		PrintCenterHScores(startRow + 4, "", "YET", "", 4);
 		PrintCenterHScores(startRow + 5, "", "", "", 4);
-		PrintCenterHScores(startRow + 6, "", "PLAY!", "", 4);
+		PrintCenterHScores(startRow + 6, "", "PLAY MORE!", "", 4);
 	}
 	else
 	{
@@ -1257,7 +1272,7 @@ int main()
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	srand(time(NULL));
-	system("color 70");
+	system("color 70"); // https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/color
 
 	float dpi = GetDpiForSystem();
 	float wdpi = GetDpiForWindow(console);
@@ -1562,10 +1577,10 @@ int main()
 				/*gotoxy(0, 0);
 				cout << "TIM: " << time(NULL) - startTime;*/
 
-				gotoxy(0, 0);
+			gotoxy(0, 0);
 				cout << repeatStr(" ", to_string(GameManager.score ).length() + 3) << "FPS: " << framecount;
-
-			/*	gotoxy(0, 2);
+				/*
+				gotoxy(0, 2);
 				cout << "FOR: " << ((player.force_x < 0) ? "-" : "+") << abs(player.force_x);
 
 				gotoxy(0, 3);
