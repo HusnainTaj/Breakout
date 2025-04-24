@@ -29,7 +29,8 @@ using namespace std;
 
 // Settings
 
-bool testing = true;
+// whether to enable testing code like controling the ball 
+bool testing = false;
 
 float dpiRatio = 1;
 
